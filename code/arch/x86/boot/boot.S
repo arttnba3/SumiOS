@@ -13,9 +13,7 @@
 
 .code32
 
-.section .boot.text:
-
-    .globl start, _start
+.section .boot.header
     .align MULTIBOOT2_HEADER_ALIGN
 
     multiboot_header:
@@ -23,16 +21,23 @@
         .long   GRUB_MULTIBOOT_ARCHITECTURE_I386
         .long   HULTIBOOT2_HEADER_LENGTH
         .long   SUMIOS_CHECKSUM
-    
     tags_end:
-        .short   0
-        .short   0
+        .short  0
+        .short  0
         .long   8
     multiboot_header_end:
 
+.section .boot.text:
+    .align PAGE_SIZE
+
+    .globl start, _start
+
     start:
     _start:
-        /* turn off the interrupt */
+        /* 
+         * turn off the interrupt,
+         * and we should turn it on after the IDT has been built.
+         */
         cli
 
         /* init the stack */
@@ -40,6 +45,7 @@
 
         /* pointer to the MULTIBOOT2 information structure */
         pushl   %ebx
+
         /* magic number */
         pushl   %eax
 
@@ -53,15 +59,24 @@
         movw     $0x2F61, 0xb800c
         movw     $0x2F33, 0xb800e
 
-        //call    startup32
+        /* set up paging*/
+
+        /* set up GDT */
+
+        /* enter long mode*/
+
+        call    startup64
     
     .loop:
+        /* we should not and never arrive there... */
         hlt
         jmp     .loop
 
 .section .boot.data:
+    .align PAGE_SIZE
 
     .globl boot_stack, boot_stack_top
+
     /**
      * When the system is just started, there's no a valid stack existed.
      * So we reserve a page there as a temporary stack for booting

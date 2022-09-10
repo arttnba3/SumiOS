@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "layout.h": "c",
+        "multiboot2.h": "c"
+    }
+}

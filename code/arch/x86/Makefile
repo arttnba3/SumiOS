@@ -2,9 +2,21 @@
 # Author: arttnba3
 # 2022.09
 
-target_files := $(shell find . -name *.S)
-#target_files += $(shell find . -name *.c)
+boot_dir = ./boot
+X86_INCLUDE = $(shell pwd)/include/
 
-all:
-	$(CC) $(CFLAGS) -o boot.o -c $(target_files) -I $(INCLUDE)
-	mv boot.o $(OUT)
+src_asm = $(wildcard *.S)
+src_asm += $(wildcard $(boot_dir)/*.S)
+
+src_c = $(wildcard *.c)
+src_c += $(wildcard $(boot_dir)/*.c)
+
+src_files = $(src_asm)
+src_files += $(src_c)
+
+obj_files = $(notdir $(patsubst %S, %o, $(src_asm)))
+obj_files += $(notdir $(patsubst %c, %o, $(src_c)))
+
+all: $(src_files)
+	$(CC) $(CFLAGS) -c $(src_files) -I $(INCLUDE) -I $(X86_INCLUDE)
+	mv $(obj_files) -t $(OUT)
