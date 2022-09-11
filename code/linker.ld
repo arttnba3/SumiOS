@@ -5,7 +5,7 @@ ENTRY(_start)
 SECTIONS
 {
     /* boot loader will load the kernel there */
-	KERM_VADDR = 0xffffffff80000000;
+	KERM_VADDR = 0xffffffff81000000;
     . = 1M;
     .boot :
 	{
@@ -18,6 +18,9 @@ SECTIONS
 		*startup64.o
 		*tty_real.o
 	}
+
+	__boot_end = .;
+	poffset = KERM_VADDR - __boot_end;
 
 	/* now it comes to the real kernel */
 	. += KERM_VADDR;

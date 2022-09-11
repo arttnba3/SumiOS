@@ -7,6 +7,7 @@ extern void putchar(char ch);
 extern void printstr(char *str);
 extern void puts(char *str);
 extern void set_char(uint8_t color, uint8_t val, uint8_t loc);
+extern void main();
 
 void startup64(unsigned int magic, multiboot_uint8_t *mbi)
 {
@@ -17,7 +18,14 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
         return ;
     }
 
-    while (1) {
-        // do nothing
+    for (int i = 0; i <10; i++) {
+        puts("Hello world!");
     }
+
+    asm volatile("movw     $0x3F61, 0xb8020");
+
+    while (1) {
+
+    }
+    //main();
 }

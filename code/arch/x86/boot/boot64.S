@@ -1,7 +1,8 @@
-.extern startup_64
+.extern startup64
+
+.code64
 
 .section .boot.text
-    .code64
     .globl long_mode_entry
         /* now we're under long mode! */
     long_mode_entry:

@@ -6,5 +6,6 @@
 
 /* CR4 */
 #define CR4_PAE (1 << 5)
+#define CR4_PGE (1 << 7)
 
 #endif

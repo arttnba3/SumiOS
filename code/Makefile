@@ -26,13 +26,16 @@ all: prepare kernel.bin
 prepare:
 	mkdir -p $(OUT)
 
-kernel.bin: arch_file
+kernel.bin: arch_file kernel_file
 	$(LD) -T linker.ld -o $(OUT)/$@ $(shell find $(OUT) -name *.o)
 
 arch_file:
 	make -C arch/
 
-qemu: kernel
+kernel_file:
+	make -C kernel/
+
+qemu: kernel.bin
 
 clean:
 	rm -rf ./out

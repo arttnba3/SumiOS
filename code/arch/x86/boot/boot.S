@@ -49,6 +49,18 @@
         /* magic number */
         pushl   %eax
 
+        /*reset eflags */
+        pushl   $0
+        popf
+
+        /* clear the screen */
+        xor     %ecx, %ecx
+    .cls:
+        movw    $0x0f20, 0xb8000(%ecx)
+        add     $2, %ecx
+        cmp     $(80 * 25 * 2), %ecx
+        jne     .cls
+
         /* print something */
         movw     $0x2F61, 0xb8000
         movw     $0x2F72, 0xb8002
@@ -78,14 +90,14 @@
         mov     $boot_page_table_pt, %edx
         mov     $boot_page_table_pmd, %eax
 
-        .pt_loop:
+    .pt_loop:
         mov     $0, %ecx
         pushl   %edx
         or      $(PAGE_ATTR_P | PAGE_ATTR_RW), %edx
         mov     %edx, (%eax)
         popl    %edx
 
-        .pte_loop:
+    .pte_loop:
         mov     %ebx, (%edx)
         add     $PAGE_SIZE, %ebx
         add     $8, %edx
@@ -104,13 +116,13 @@
         popl    %edi
         popl    %esi
 
-        /* enable PAE */
+        /* enable PAE and PGE */
         mov     %cr4, %eax
-        or      $CR4_PAE, %eax
+        or      $(CR4_PAE | CR4_PGE), %eax
         mov     %eax, %cr4
 
         /* enable long mode */
-        mov     $0xc0000080, %ecx
+        mov     $0xC0000080, %ecx
         rdmsr
         or      $(1 << 8), %eax
         wrmsr
@@ -125,9 +137,11 @@
         lgdt    0(%eax)
 
         /* enter the 64-bit long mode world! */
-    .code64
-        mov     $long_mode_entry, %rax
-        call    %rax
+        /**
+         * NOTE: we MUST use such a jump instruction
+         * to enter 64-bit long moce, or
+        */
+        jmp     $8, $long_mode_entry
     
     .loop:
         /* we should not and never arrive there... */
