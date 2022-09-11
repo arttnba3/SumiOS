@@ -7,12 +7,14 @@ uint8_t *text_mem = (uint8_t*) REALMODE_TEXT_MODE_ADDR;
 static inline uint16_t get_cursor_loc(void)
 {
     uint16_t cursor_loc;
+    uint8_t cursor_loc_low, cursor_loc_high;
 
     outb(CRTC_ADDRESS_REGISTER, CRTC_DATA_CURSOR_LOC_HIGH);
-    cursor_loc = inb(CRTC_DATA_REGISTER);
-    cursor_loc <<= 8;
+    cursor_loc_high = inb(CRTC_DATA_REGISTER);
     outb(CRTC_ADDRESS_REGISTER, CRTC_DATA_CURSOR_LOC_LOW);
-    cursor_loc += inb(CRTC_DATA_REGISTER);
+    cursor_loc_low = inb(CRTC_DATA_REGISTER);
+
+    cursor_loc = (cursor_loc_high << 8) | cursor_loc_low;
 
     return cursor_loc;
 }
@@ -27,8 +29,8 @@ static inline void set_cursor_loc(uint16_t cursor_loc)
 
 void set_char(uint8_t color, uint8_t val, uint8_t loc)
 {
-    text_mem[loc * 2] = color;
-    text_mem[loc * 2 + 1] = val;
+    text_mem[loc * 2] = val;
+    text_mem[loc * 2 + 1] = color;
 }
 
 static inline void roll_screen_mem(void)
@@ -90,9 +92,8 @@ void putchar(char ch)
 
 void printstr(char *str)
 {
-    while (str) {
-        putchar(*str);
-        str++;
+    for (int i = 0; str[i]; i++) {
+        putchar(str[i]);
     }
 }
 
@@ -100,4 +101,17 @@ void puts(char *str)
 {
     printstr(str);
     putchar('\n');
+}
+
+void clear_screen(void)
+{
+    for (int i = 0; i < VGA_TEXT_SIZE; i++) {
+        set_char((VGA_TEXT_COLOR_BLACK << 4) | VGA_TEXT_COLOR_WHIGHT, ' ', i);
+    }
+    set_cursor_loc(0);
+}
+
+void vga_init(void)
+{
+    
 }

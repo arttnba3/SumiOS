@@ -1,5 +1,5 @@
 #include <mm/page_types.h>
-#include <cpu.h>
+#include <asm/cpu.h>
 
 #define MULTIBOOT2_HEADER_MAGIC (0xe85250d6)
 #define GRUB_MULTIBOOT_ARCHITECTURE_I386 (0)
@@ -138,10 +138,19 @@
 
         /* enter the 64-bit long mode world! */
         /**
-         * NOTE: we MUST use such a jump instruction
-         * to enter 64-bit long moce, or
+         * NOTE: 
+         * we MUST use such an instruction to make a long jump, 
+         * so that we can enter the 64-bit long mode correctly.
+         * or we'll stay under 32-bit and something BAD will happen :(
+         *
+         * XXX: 
+         * It seems an lretq also work there? But when I use lretq to
+         * jmp to long_mode_entry(), most of things are OK, except that I cannot
+         * print string by directly accessing 0xB8000(it works when I use jmp).
+         * I don't know why because all this is just only to jmp far and
+         * set the cs selector to gdt[1], but they performed a bit differently..
         */
-        jmp     $8, $long_mode_entry
+        jmp     $(1 << SELECTOR_INDEX), $long_mode_entry
     
     .loop:
         /* we should not and never arrive there... */
@@ -186,10 +195,8 @@
     gdt64:
         .quad 0
     gdt64_code_segment:
-        //.quad (1 << 43) | (1 < 44) | (1 << 47) | (1 << 53)
         .quad 0x00209A0000000000
     gdt64_data_segment:
-        //.quad (1 << 43) | (1 < 44) | (1 << 47) | (1 << 53)
         .quad 0x0000920000000000
     gdt64_ptr:
         .short gdt64_ptr - gdt64 - 1

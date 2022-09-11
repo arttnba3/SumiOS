@@ -20,7 +20,6 @@ SECTIONS
 	}
 
 	__boot_end = .;
-	poffset = KERM_VADDR - __boot_end;
 
 	/* now it comes to the real kernel */
 	. += KERM_VADDR;
