@@ -12,7 +12,7 @@ $ ./build.sh
 
 ### Run
 
-We use QEMU to run it in default.
+We use QEMU to run it by default.
 
 ```shell
 $ ./run.sh
