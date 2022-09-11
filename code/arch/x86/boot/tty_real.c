@@ -62,15 +62,15 @@ static inline void boot_set_cursor_loc(uint16_t cursor_loc)
     }
 }
 
-void boot_set_char(uint8_t color, uint8_t val, uint8_t loc)
+void boot_set_char(uint8_t color, uint8_t val, uint64_t loc)
 {
     boot_text_mem[loc] = (color << 8) | val;
 }
 
 static inline void boot_roll_screen_mem(void)
 {
-    for (int i = 0; i < CGA_TEXT_SIZE - CGA_TEXT_COLUMNS; i++) {
-        boot_text_mem[i] = boot_text_mem[i + 1];
+    for (int i = CGA_TEXT_COLUMNS; i < CGA_TEXT_SIZE; i++) {
+        boot_text_mem[i - CGA_TEXT_COLUMNS] = boot_text_mem[i];
     }
 
     for (int i = 0; i < CGA_TEXT_COLUMNS; i++) {
@@ -153,7 +153,7 @@ static void __boot_putchar_cga(uint8_t color, char ch)
     /* check for rolling screen */
     if (boot_cursor_loc >= CGA_TEXT_SIZE) {
         boot_roll_screen_mem();
-        boot_cursor_loc -= CGA_TEXT_COLUMNS;
+        boot_cursor_loc = CGA_TEXT_SIZE - CGA_TEXT_COLUMNS;
     }
 
     /* write new cursor location back */
