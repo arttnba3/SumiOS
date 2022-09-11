@@ -7,29 +7,39 @@
 #ifndef GRAPHICS_VGA_H
 #define GRAPHICS_VGA_H
 
-/* Text mode */
-#define REALMODE_TEXT_MODE_ADDR 0xB8000
-#define REALMODE_TEXT_MODE_END  0xB8FFF
+enum {
+    DISPLAY_MODE_BLACKWHITE = 0,
+    DISPLAY_MODE_TEXT,
+};
 
-#define VGA_TEXT_COLUMNS 80
-#define VGA_TEXT_ROWS 25
-#define VGA_TEXT_SIZE VGA_TEXT_COLUMNS * VGA_TEXT_ROWS
-#define VGA_TEXT_COLOR_BLACK 0x0
-#define VGA_TEXT_COLOR_BLUE 0x1
-#define VGA_TEXT_COLOR_GREEN 0x2
-#define VGA_TEXT_COLOR_CYAN 0x3
-#define VGA_TEXT_COLOR_RED 0x4
-#define VGA_TEXT_COLOR_MAGENTA 0x5
-#define VGA_TEXT_COLOR_BROWN 0x6
-#define VGA_TEXT_COLOR_LIGHT_GRAY 0x7
-#define VGA_TEXT_COLOR_DARK_GRAY 0x8
-#define VGA_TEXT_COLOR_LIGHT_GREEN 0x9
-#define VGA_TEXT_COLOR_LIGHT_BLUE 0xA
-#define VGA_TEXT_COLOR_LIGHT_CYAN 0xB
-#define VGA_TEXT_COLOR_LIGHT_RED 0xC
-#define VGA_TEXT_COLOR_PINK 0xD
-#define VGA_TEXT_COLOR_YELLOW 0xE
-#define VGA_TEXT_COLOR_WHIGHT 0xF
+/* Text mode */
+#define CGA_BLACKWHITE_VRAM_START 0xB0000
+#define CGA_BLACKWHITE_VRAM_END 0xB7FFF
+#define CGA_TEXT_VRAM_START 0xB8000
+#define CGA_TEXT_VRAM_END  0xB8FFF
+
+#define CGA_TEXT_COLUMNS 80
+#define CGA_TEXT_ROWS 25
+#define CGA_TEXT_SIZE (CGA_TEXT_COLUMNS * CGA_TEXT_ROWS)
+#define CGA_TEXT_COLOR_BLACK 0x0
+#define CGA_TEXT_COLOR_BLUE 0x1
+#define CGA_TEXT_COLOR_GREEN 0x2
+#define CGA_TEXT_COLOR_CYAN 0x3
+#define CGA_TEXT_COLOR_RED 0x4
+#define CGA_TEXT_COLOR_MAGENTA 0x5
+#define CGA_TEXT_COLOR_BROWN 0x6
+#define CGA_TEXT_COLOR_LIGHT_GRAY 0x7
+#define CGA_TEXT_COLOR_DARK_GRAY 0x8
+#define CGA_TEXT_COLOR_LIGHT_GREEN 0x9
+#define CGA_TEXT_COLOR_LIGHT_BLUE 0xA
+#define CGA_TEXT_COLOR_LIGHT_CYAN 0xB
+#define CGA_TEXT_COLOR_LIGHT_RED 0xC
+#define CGA_TEXT_COLOR_PINK 0xD
+#define CGA_TEXT_COLOR_YELLOW 0xE
+#define CGA_TEXT_COLOR_WHIGHT 0xF
+
+#define CGA_TEXT_COLOR_DEFAULT \
+        ((CGA_TEXT_COLOR_BLACK << 4) | CGA_TEXT_COLOR_WHIGHT)
 
 /* VGA Registers */
 /**
@@ -37,8 +47,10 @@
  */
 #define CRAPHICS_ADDRESS_REGISTER 0x3CE
 #define CRAPHICS_DATA_REGISTER 0x3CE
-#define CRTC_ADDRESS_REGISTER 0x3D4
-#define CRTC_DATA_REGISTER 0x3D5
+#define CRTC_ADDRESS_REGISTER_BLACKWHITE 0x3B4
+#define CRTC_DATA_REGISTER_BLACKWHITE 0x3B5
+#define CRTC_ADDRESS_REGISTER_TEXT 0x3D4
+#define CRTC_DATA_REGISTER_TEXT 0x3D5
 
 /* CRT Controller Data Registers */
 #define CRTC_DATA_HORIZONAL_TOTAL 0x0
@@ -66,5 +78,48 @@
 #define CRTC_DATA_END_VERTICAL_BLANKING 0x16
 #define CRTC_DATA_CRTC_MODE_CONTROL 0x17
 #define CRTC_DATA_LINE_COMPARE 0x18
+
+/* Some other things... */
+
+/* Serial I/O Code, refers to xv6 */
+#define COM_SERIAL_BASE 0x3F8
+// In:	Receive buffer (DLAB=0)
+#define COM_SERIAL_TX (COM_SERIAL_BASE + 0)
+// Out: Transmit buffer (DLAB=0)
+#define COM_SERIAL_RX (COM_SERIAL_BASE + 0)
+// Out: Divisor Latch Low (DLAB=1)
+#define COM_SERIAL_DLL (COM_SERIAL_BASE + 0)
+// Out: Divisor Latch High (DLAB=1)
+#define COM_SERIAL_DLM (COM_SERIAL_BASE + 1)
+// Out: Interrupt Enable Register
+#define COM_SERIAL_IER (COM_SERIAL_BASE + 1)
+//   Enable receiver data interrupt
+#define     COM_SERIAL_IER_RDI (COM_SERIAL_BASE + 1)
+// In:	Interrupt ID Register
+#define COM_SERIAL_IIR (COM_SERIAL_BASE + 2)
+// Out: FIFO Control Register
+#define COM_SERIAL_FCR (COM_SERIAL_BASE + 2)
+// Out: Line Control Register
+#define COM_SERIAL_LCR (COM_SERIAL_BASE + 3)
+//   Divisor latch access bit
+#define     COM_SERIAL_LCR_DLAB (COM_SERIAL_BASE + 0x80)
+//   Wordlength: 8 bits
+#define     COM_SERIAL_LCR_WLEN8 (COM_SERIAL_BASE + 3)
+// Out: Modem Control Register
+#define COM_SERIAL_MCR (COM_SERIAL_BASE + 4)
+// RTS complement
+#define     COM_SERIAL_MCR_RTS (COM_SERIAL_BASE + 2)
+// DTR complement
+#define     COM_SERIAL_MCR_DTR (COM_SERIAL_BASE + 1)
+// Out2 complement
+#define     COM_SERIAL_MCR_OUT2 (COM_SERIAL_BASE + 8)
+// In:	Line Status Register
+#define COM_SERIAL_LSR (COM_SERIAL_BASE + 5)
+//   Data available
+#define     COM_SERIAL_LSR_DATA (COM_SERIAL_BASE + 1)
+//   Transmit buffer avail
+#define     COM_SERIAL_LSR_TX_READY (COM_SERIAL_BASE + 0x20)
+//   Transmitter off
+#define     COM_SERIAL_LSR_TSRE (COM_SERIAL_BASE + 0x40)
 
 #endif

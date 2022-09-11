@@ -2,34 +2,35 @@
 #include <boot/multiboot2.h>
 #include <sumios/types.h>
 
-extern void putchar(char ch);
-extern void printstr(char *str);
-extern void puts(char *str);
-extern void clear_screen(void);
+extern void boot_putchar(char ch);
+extern void boot_printstr(char *str);
+extern void boot_puts(char *str);
+extern void boot_set_char(uint8_t color, uint8_t val, uint8_t loc);
+extern void boot_tty_init(void);
 extern void main();
+extern uint16_t *boot_text_mem;
 
 void startup64(unsigned int magic, multiboot_uint8_t *mbi)
 {
-    clear_screen();
-    puts("Sumi OS v0.0.1\n");
+    /* this's just a temporary tty for booting stage */
+    boot_tty_init();
 
-    puts("[*] System setting up...");
+    boot_puts("Sumi OS v0.0.1\n");
+
+    boot_puts("[*] System setting up...");
 
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        puts("BAD BOOTLOADER MAGIC!");
+        boot_puts("BAD BOOTLOADER MAGIC!");
         return ;
     }
 
-    for (int i = 0; i < 15; i++) {
-        puts("Hello world!");
-    }
-
-    for (int i = 0; i < 10; i++) {
-        puts("Test for roll screen!");
+    for (int i = 0; i < 80000; i++) {
+        boot_puts("Hello world!");
     }
 
     while (1) {
         
     }
+
     //main();
 }
