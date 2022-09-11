@@ -3,7 +3,6 @@
 #include <sumios/types.h>
 
 uint16_t *tm = (uint16_t*) 0xB8000;
-
 extern void putchar(char ch);
 extern void printstr(char *str);
 extern void puts(char *str);
@@ -13,9 +12,12 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
 {
     //puts("Welcome to Sumi OS!");
 
-
+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
+        puts("BAD BOOTLOADER MAGIC!");
+        return ;
+    }
 
     while (1) {
-            tm[100] = 0x2F61;
+        // do nothing
     }
 }
