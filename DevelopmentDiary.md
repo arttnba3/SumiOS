@@ -2,7 +2,7 @@
 
 Project Started.
 
-Compared to those 32-bit toys(i.e. xv6 and [elephant os](https://github.com/arttnba3/OS_Kernel_Learning)), it seems more complex and difficult for 64-bit OS kernel development.
+Compared to those 32-bit toys(e.g. xv6 and [elephant os](https://github.com/arttnba3/OS_Kernel_Learning)), it seems more complex and difficult for 64-bit OS kernel development.
 
 Fortunately I found [OSDev wiki](https://wiki.osdev.org/Main_Page) and [this video](https://www.youtube.com/watch?v=FkrpUaGThTQ) besides [Multiboot2 Spec](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html), they helped me a lot at the beginning.
 
