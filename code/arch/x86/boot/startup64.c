@@ -18,9 +18,11 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
     /* this's just a temporary tty for booting stage */
     boot_tty_init();
 
-    boot_puts("Welcome to Sumi OS v0.0.1\n");
-
-    boot_puts("System setting up...\n");
+    boot_puts("Sumi OS v0.0.1");
+    boot_puts("Copyright (c) 2022 arttnba3 <arttnba@gmail.com>\n");
+    boot_puts("This is a 64-bit and toy-like OS developed by arttnba3.\n");
+    
+    boot_puts("[*] System setting up...\n");
 
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         boot_puts("[x] BAD BOOTLOADER MAGIC!");

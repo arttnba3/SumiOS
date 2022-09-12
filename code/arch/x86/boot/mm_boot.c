@@ -64,7 +64,7 @@ static void boot_mm_detect(void)
     boot_puts("\n\t[+] boot memory deteced done. ");
     boot_printstr("\t[*] total: 0x");
     boot_printhex(mem_total);
-    boot_printstr("KB available, base = ");
+    boot_printstr("KB available, base = 0x");
     boot_printhex(mem_base);
     boot_printstr("KB, extend = 0x");
     boot_printhex(mem_total - mem_base);

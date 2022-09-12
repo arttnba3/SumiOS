@@ -227,7 +227,7 @@ void boot_printhex(uint64_t n)
 
     do {
         uint64_t curr = n % 16;
-        if (curr > 10) {
+        if (curr >= 10) {
             n_str[--idx] = curr - 10 + 'a';
         } else {
             n_str[--idx] = curr + '0';
