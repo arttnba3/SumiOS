@@ -23,7 +23,8 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
     }
 
     while (1) {
-        
+        boot_puts("Hello world!");
+        boot_puts("This is Sumi OS v0.01!");
     }
 
     //main();

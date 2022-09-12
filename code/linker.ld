@@ -16,7 +16,7 @@ SECTIONS
 
 		/* C part boot kernel */
 		*startup64.o
-		*tty_real.o
+		*tty_boot.o
 	}
 
 	__boot_end = .;
