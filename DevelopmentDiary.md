@@ -26,5 +26,8 @@ An interger overflow was found in `boot_set_cursor_loc` after hours. The stupid 
 
 CGA display needs some special steps to operate the serial and some other shits to work correctly. I solved this problem referred to what xv6 did, because I don't want to waste too much time on it.
 
+More shits occurred in front of me because of my carelessness and my lacks of basic CS knowledge. Hope that tomorrow will be well...
+
 - Fix output problem.
 - Complete serial operation for text-mode display.
+- Complete memory detection by CMOS.

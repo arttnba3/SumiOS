@@ -7,6 +7,8 @@ uint16_t boot_cursor_loc;
 uint16_t boot_display_mode;
 int boot_serial_exists;
 
+void boot_putchar(char ch);
+
 static inline uint16_t boot_get_cursor_loc_blackwhite(void)
 {
     uint16_t cursor_loc;
@@ -132,17 +134,22 @@ static void __boot_putchar_cga(uint8_t color, char ch)
 {
     /* write char on the text-mode graphic mem */
     switch (ch) {
+        case '\n':
+            boot_cursor_loc += CGA_TEXT_COLUMNS;
+            /* fall through there, so that \n == \r + \n */
         case '\r':
             boot_cursor_loc -= (boot_cursor_loc % CGA_TEXT_COLUMNS);
-            break;
-        case '\n':
-            __boot_putchar_cga(color, '\r');
-            boot_cursor_loc += CGA_TEXT_COLUMNS;
             break;
         case '\b':
             if (boot_cursor_loc % CGA_TEXT_COLUMNS) {
                 boot_cursor_loc--;
             }
+            break;
+        case '\t':
+            boot_putchar(' ');
+            boot_putchar(' ');
+            boot_putchar(' ');
+            boot_putchar(' ');
             break;
         default:
             boot_set_char(color, ch, boot_cursor_loc);
@@ -187,6 +194,48 @@ void boot_puts(char *str)
 {
     boot_printstr(str);
     boot_putchar('\n');
+}
+
+void boot_printnum(int64_t n)
+{
+    /* for 64-bit num it's enough*/
+    char n_str[30];
+    int idx = 30;
+
+    n_str[--idx] = '\0';
+
+    if (n < 0) {
+        boot_putchar('-');
+        n = -n;
+    }
+
+    do {
+        n_str[--idx] = (n % 10) + '0';
+        n /= 10;
+    } while (n);
+    
+    boot_printstr(n_str + idx);
+}
+
+void boot_printhex(uint64_t n)
+{
+    /* for 64-bit num it's enough*/
+    char n_str[30];
+    int idx = 30;
+
+    n_str[--idx] = '\0';
+
+    do {
+        uint64_t curr = n % 16;
+        if (curr > 10) {
+            n_str[--idx] = curr - 10 + 'a';
+        } else {
+            n_str[--idx] = curr + '0';
+        }
+        n /= 16;
+    } while (n);
+    
+    boot_printstr(n_str + idx);
 }
 
 void boot_clear_screen(void)
@@ -257,6 +306,6 @@ void boot_tty_init(void)
     boot_clear_screen();
     boot_tty_serial_init();
     if (!boot_serial_exists) {
-        boot_puts("NO serial port, you cannot input anything!");
+        boot_puts("[x] NO serial port, you cannot input anything!\n");
     }
 }

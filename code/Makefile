@@ -6,7 +6,7 @@ CC	:= $(GCCPREFIX)gcc -pipe
 AS	:= $(GCCPREFIX)as
 AR	:= $(GCCPREFIX)ar
 LD	:= $(GCCPREFIX)ld
-CFLAGS := -ffreestanding -nostdlib -fno-pie -fno-stack-protector
+CFLAGS := -ffreestanding -nostdlib -fno-pie -fno-stack-protector -mcmodel=large
 LDFLAGS := -nostdlib -z max-page-size=0x1000
 
 export CC
@@ -16,9 +16,11 @@ export LD
 export CFLAGS
 
 INCLUDE := $(shell pwd)/include/
+ARCH_INCLUDE := $(shell pwd)/arch/x86/include/
 OUT := $(shell pwd)/out/
 
 export INCLUDE
+export ARCH_INCLUDE
 export OUT
 
 all: prepare kernel.bin
