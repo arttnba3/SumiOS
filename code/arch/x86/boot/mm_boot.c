@@ -1,6 +1,7 @@
 #include <sumios/types.h>
+#include <sumios/kernel.h>
 #include <mm/layout.h>
-#include <mm/page_types.h>
+#include <mm/mm.h>
 #include <asm/mm.h>
 #include <asm/io.h>
 
@@ -10,9 +11,12 @@ extern void boot_puts(char *str);
 extern void boot_printnum(int64_t n);
 extern void boot_printhex(uint64_t n);
 
-extern uint64_t __boot_start, *__kernel_end;
+extern void *memset(uint8_t *dst, uint64_t sz, uint8_t val);
 
-uint64_t mem_total;
+extern uint64_t __boot_start, __kernel_end, __roseg_end, boot_page_table_pud;
+
+uint64_t boot_mem_total, boot_mem_alloc_start;
+phys_addr_t kern_pgtable;
 
 /**
  * Read from mc146818 CMOS
@@ -54,21 +58,166 @@ static void boot_mm_detect(void)
     mem_ext16 = nvram_read(NVRAM_EXT16LO) * 64;
 
     if (mem_ext16) {
-        mem_total = 16 * 1024 + mem_ext16;
+        boot_mem_total = 16 * 1024 + mem_ext16;
     } else if (mem_ext) {
-        mem_total = 1 * 1024 + mem_ext;
+        boot_mem_total = 1 * 1024 + mem_ext;
     } else {
-        mem_total = mem_base;
+        boot_mem_total = mem_base;
     }
 
     boot_puts("\n\t[+] boot memory deteced done. ");
     boot_printstr("\t[*] total: 0x");
-    boot_printhex(mem_total);
+    boot_printhex(boot_mem_total);
     boot_printstr("KB available, base = 0x");
     boot_printhex(mem_base);
     boot_printstr("KB, extend = 0x");
-    boot_printhex(mem_total - mem_base);
-    boot_puts("KB\n");
+    boot_printhex(boot_mem_total - mem_base);
+    boot_puts("KB");
+
+    /* we still need to count it by Bytes in later use */
+    boot_mem_total *= 1024;
+}
+
+/**
+ * @brief This's just a simple linear mm allocator for booting stage to build up
+ * the page table for kernel image, and build up GDT,IDT, etc. So we don't
+ * concern about free there.
+ * 
+ * @param sz the size to alloc. it'll be round up to page-aligned
+ * @return void* :the allocated memory, NULL for failing
+ */
+void *boot_mm_alloc(uint64_t sz)
+{
+    void *chunk;
+
+    if ((!sz)){
+        boot_puts("[x] bad size!");
+        return NULL;
+    }
+    if (((ALIGN(sz, PAGE_SIZE) + boot_mem_alloc_start) >= boot_mem_total)) {
+        boot_printstr("[x] sz round up to: ");
+        boot_printhex(ALIGN(sz, PAGE_SIZE) + boot_mem_alloc_start);
+        boot_puts(", that\'s too big!");
+        return NULL;
+    }
+
+    chunk = (void*) boot_mem_alloc_start;
+    boot_mem_alloc_start += ALIGN(sz, PAGE_SIZE);
+
+    return chunk;
+}
+
+phys_addr_t boot_get_pgtable_map_pa(phys_addr_t pgtable, virt_addr_t va)
+{
+    pgd_t *pgd;
+    pud_t *pud;
+    pmd_t *pmd;
+    pte_t *pte;
+    int pgd_i = PGD_ENTRY(va);
+    int pud_i = PUD_ENTRY(va);
+    int pmd_i = PMD_ENTRY(va);
+    int pte_i = PTE_ENTRY(va);
+
+    pgd = pgtable;
+    if (!pgd[pgd_i]) {
+        boot_puts("[x] pgd not found!");
+        return -1;
+    }
+    pud = pgd[pgd_i];
+    if (!pud[pud_i]) {
+        boot_puts("[x] pud not found!");
+        return -1;
+    }
+    pmd = pud[pud_i];
+    if (!pmd[pmd_i]) {
+        boot_puts("[x] pmd not found!");
+        return -1;
+    }
+    pte = pmd[pmd_i];
+    return pte[pte_i];
+}
+
+/* map for single page */
+void boot_pgtable_map(phys_addr_t pgtable, virt_addr_t va, phys_addr_t pa, 
+                      page_attr_t attr)
+{
+    pgd_t *pgd;
+    pud_t *pud;
+    pmd_t *pmd;
+    pte_t *pte;
+    int pgd_i = PGD_ENTRY(va);
+    int pud_i = PUD_ENTRY(va);
+    int pmd_i = PMD_ENTRY(va);
+    int pte_i = PTE_ENTRY(va);
+
+    pgd = pgtable;
+    if (!pgd[pgd_i]) {
+        pgd[pgd_i] = boot_mm_alloc(PAGE_SIZE);
+        memset(pgd[pgd_i], 0, PAGE_SIZE);
+    }
+    pud = pgd[pgd_i];
+    if (!pud[pud_i]) {
+        pud[pud_i] = boot_mm_alloc(PAGE_SIZE);
+        memset(pud[pud_i], 0, PAGE_SIZE);
+    }
+    pmd = pud[pud_i];
+    if (!pmd[pmd_i]) {
+        pmd[pmd_i] = boot_mm_alloc(PAGE_SIZE);
+        memset(pmd[pmd_i], 0, PAGE_SIZE);
+    }
+    pte = pmd[pmd_i];
+    pte[pte_i] = pa | attr;
+}
+
+void boot_mm_pgtable_init(void)
+{
+    pgd_t *pgd;
+    phys_addr_t kern_phys = 0;
+    virt_addr_t kern_virt = KERNEL_BASE_ADDR;
+
+    kern_pgtable = boot_mm_alloc(PAGE_SIZE);
+    memset(kern_pgtable, 0, PAGE_SIZE);
+
+    /* map for read-only region */
+    while (kern_virt < (uint64_t) (&__roseg_end)) {
+        //boot_printstr("map kern virt 0x");boot_printhex(kern_virt);
+        //boot_printstr(" to phys 0x");boot_printhex(kern_phys);boot_puts("");
+        boot_pgtable_map(kern_pgtable, kern_virt, kern_phys, PAGE_ATTR_P);
+        kern_virt += PAGE_SIZE;
+        kern_phys += PAGE_SIZE;
+    }
+
+    /* map for read-write region */
+    while (kern_virt < (uint64_t) (&__kernel_end)) {
+        boot_pgtable_map(kern_pgtable, kern_virt, kern_phys, 
+                        PAGE_ATTR_P | PAGE_ATTR_RW);
+        kern_virt += PAGE_SIZE;
+        kern_phys += PAGE_SIZE;
+    }
+
+    /* reget the boot page table in it, we'll clear it in virt kernel stage */
+    pgd = kern_pgtable;
+    pgd[0] = (phys_addr_t) (&boot_page_table_pud);
+    pgd[0] |= PAGE_ATTR_P | PAGE_ATTR_RW;
+
+    /* load the new page table now! */
+    asm volatile(
+        "mov    %0, %%rax;"
+        "mov    %%rax, %%cr3;"
+        :
+        : "a" (kern_pgtable)
+    );
+
+    for (kern_virt = KERNEL_BASE_ADDR + 0x118000; kern_virt <= KERNEL_BASE_ADDR + 0x118000; kern_virt+=PAGE_SIZE) {
+        boot_printstr("virt addr 0x");boot_printhex(kern_virt);
+        kern_phys = boot_get_pgtable_map_pa(kern_pgtable, kern_virt);
+        if (kern_phys == -1) {
+            boot_puts(" has no map yet!");
+        } else {
+            boot_printstr(" mapped to phys addr 0x");
+            boot_printhex(kern_phys);boot_puts("");
+        }
+    }
 }
 
 void boot_mm_init(void)
@@ -87,5 +236,13 @@ void boot_mm_init(void)
     /* detect basic usable memory */
     boot_mm_detect();
     
+    /* we want a PAGE-aligned allocation start there */
+    boot_mem_alloc_start = \
+                    ALIGN(((uint64_t) &__boot_start) + kernel_size, PAGE_SIZE);
+    boot_printstr("\t[*] booting memory allocate from 0x");
+    boot_printhex(boot_mem_alloc_start);
+    boot_puts("");
 
+    /* now we start to allocate a page table for kernel space from highmem */
+    boot_mm_pgtable_init();
 }

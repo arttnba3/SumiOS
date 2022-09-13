@@ -1,5 +1,5 @@
-#ifndef MM_MMU_H
-#define MM_MMU_H
+#ifndef MM_PAGE_TYPES_H
+#define MM_PAGE_TYPES_H
 
 /* page size */
 #define PAGE_SHIFT 12

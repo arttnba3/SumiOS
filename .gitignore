@@ -4,3 +4,4 @@ kernel.iso
 *.o
 .gdb_history
 .vscode/
+boot.sh

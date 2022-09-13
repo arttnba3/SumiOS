@@ -33,21 +33,31 @@ SECTIONS
 		*(.text)
 	}
 
+	. = ALIGN(4096);
+
 	.rodata ALIGN(4096) : AT (ADDR (.rodata) - KERM_VADDR)
 	{
 		*(.rodata)
 	}
+
+	. = ALIGN(4096);
+
+	__roseg_end = .;
 
 	.data ALIGN(4096) : AT (ADDR (.data) - KERM_VADDR)
 	{
 		*(.data)
 	}
 
+	. = ALIGN(4096);
+
 	.bss ALIGN(4096) : AT (ADDR (.bss) - KERM_VADDR)
 	{
 		*(COMMON)
 		*(.bss)
 	}
+
+	. = ALIGN(4096);
 
 	__kernel_end = .;
 }
