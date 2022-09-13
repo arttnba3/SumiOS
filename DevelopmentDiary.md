@@ -31,3 +31,10 @@ More shits occurred in front of me because of my carelessness and my lacks of ba
 - Fix output problem.
 - Complete serial operation for text-mode display.
 - Complete memory detection by CMOS.
+
+## Sep 13, 2022
+
+I tried to add a basic and temporary memory allocator for booting stage to establish the real kernel page table, and after some silly mistakes it seems that my baby liner-memory allocator works well. But when I tried to load the new page table into cr3, it didn't work at all on the high mem.
+
+- Add a basic memory allocator for booting stage.
+- Add basic structure for highmem area(not work correctly yet).
