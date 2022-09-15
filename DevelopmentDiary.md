@@ -38,3 +38,14 @@ I tried to add a basic and temporary memory allocator for booting stage to estab
 
 - Add a basic memory allocator for booting stage.
 - Add basic structure for highmem area(not work correctly yet).
+
+## Sep 15, 2022
+
+In fact I'm a little busy recently so I only solved a bug today. 
+
+Do you still remenber that in last diary I found the page table didn't work on the high mem? At first I thought that I gave a wrong offset on some level or I made a misunderstanding about the 4-level page table's structure. But everything seems fucking ok, so I thought that the reason may be some long-mode features that I didn't know and I still found nothing about it after hours.
+
+The point of solving this problem came at the time I tried to remap the start 2M like what I did in `boot.S` and it crashed as what used to appear on the high mem. It told me that the problem should be in `boot_get_pgtable_map_pa()` and I finally found out that I forgot to set the attributes for upper-level entries. So I quickly fixed it and successfully come to the high men area.
+
+- Fix the bug in memory mapping in booting stage.
+

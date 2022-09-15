@@ -2,5 +2,7 @@
 #define SUMIOS_KERNEL_H
 
 #include <sumios/align.h>
+#include <sumios/print.h>
+#include <sumios/string.h>
 
 #endif

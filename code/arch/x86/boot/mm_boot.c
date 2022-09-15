@@ -11,7 +11,7 @@ extern void boot_puts(char *str);
 extern void boot_printnum(int64_t n);
 extern void boot_printhex(uint64_t n);
 
-extern void *memset(uint8_t *dst, uint64_t sz, uint8_t val);
+extern void *boot_memset(uint8_t *dst, uint64_t sz, uint8_t val);
 
 extern uint64_t __boot_start, __kernel_end, __roseg_end, boot_page_table_pud;
 
@@ -150,22 +150,28 @@ void boot_pgtable_map(phys_addr_t pgtable, virt_addr_t va, phys_addr_t pa,
     int pmd_i = PMD_ENTRY(va);
     int pte_i = PTE_ENTRY(va);
 
+    /**
+     * don't FORGET to set the attr for each level's entry!
+     */
     pgd = pgtable;
     if (!pgd[pgd_i]) {
         pgd[pgd_i] = boot_mm_alloc(PAGE_SIZE);
-        memset(pgd[pgd_i], 0, PAGE_SIZE);
+        boot_memset(pgd[pgd_i], 0, PAGE_SIZE);
+        pgd[pgd_i] |= attr;
     }
-    pud = pgd[pgd_i];
+    pud = pgd[pgd_i] & PAGE_MASK;
     if (!pud[pud_i]) {
         pud[pud_i] = boot_mm_alloc(PAGE_SIZE);
-        memset(pud[pud_i], 0, PAGE_SIZE);
+        boot_memset(pud[pud_i], 0, PAGE_SIZE);
+        pud[pud_i] |= attr;
     }
-    pmd = pud[pud_i];
+    pmd = pud[pud_i] & PAGE_MASK;
     if (!pmd[pmd_i]) {
         pmd[pmd_i] = boot_mm_alloc(PAGE_SIZE);
-        memset(pmd[pmd_i], 0, PAGE_SIZE);
+        boot_memset(pmd[pmd_i], 0, PAGE_SIZE);
+        pmd[pmd_i]|= attr;
     }
-    pte = pmd[pmd_i];
+    pte = pmd[pmd_i] & PAGE_MASK;
     pte[pte_i] = pa | attr;
 }
 
@@ -176,7 +182,7 @@ void boot_mm_pgtable_init(void)
     virt_addr_t kern_virt = KERNEL_BASE_ADDR;
 
     kern_pgtable = boot_mm_alloc(PAGE_SIZE);
-    memset(kern_pgtable, 0, PAGE_SIZE);
+    boot_memset(kern_pgtable, 0, PAGE_SIZE);
 
     /* map for read-only region */
     while (kern_virt < (uint64_t) (&__roseg_end)) {
@@ -207,17 +213,6 @@ void boot_mm_pgtable_init(void)
         :
         : "a" (kern_pgtable)
     );
-
-    for (kern_virt = KERNEL_BASE_ADDR + 0x118000; kern_virt <= KERNEL_BASE_ADDR + 0x118000; kern_virt+=PAGE_SIZE) {
-        boot_printstr("virt addr 0x");boot_printhex(kern_virt);
-        kern_phys = boot_get_pgtable_map_pa(kern_pgtable, kern_virt);
-        if (kern_phys == -1) {
-            boot_puts(" has no map yet!");
-        } else {
-            boot_printstr(" mapped to phys addr 0x");
-            boot_printhex(kern_phys);boot_puts("");
-        }
-    }
 }
 
 void boot_mm_init(void)

@@ -2,6 +2,7 @@
     "files.associations": {
         "layout.h": "c",
         "multiboot2.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "kernel.h": "c"
     }
 }

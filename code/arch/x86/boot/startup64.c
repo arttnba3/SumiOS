@@ -35,12 +35,6 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
     /* kernel memory initialization */
     boot_mm_init();
 
-    boot_printstr("phys addr of main: 0x");
-    boot_printhex(((uint64_t)&main) - 0xffffffff81000000);
-    boot_printstr("\nvirt addr of main: 0x");
-    boot_printhex(&main);
-
-
-
+    /* enter the high men kernel now! */
     main();
 }
