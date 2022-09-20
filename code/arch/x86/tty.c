@@ -1,6 +1,7 @@
 #include <graphics/vga.h>
 #include <sumios/types.h>
 #include <asm/io.h>
+#include <mm/mm.h>
 
 uint16_t *text_mem;
 uint16_t cursor_loc;
@@ -188,61 +189,6 @@ void kputchar(char ch)
     __kputchar(CGA_TEXT_COLOR_DEFAULT, ch);
 }
 
-void kprintstr(char *str)
-{
-    for (int i = 0; str[i]; i++) {
-        kputchar(str[i]);
-    }
-}
-
-void kputs(char *str)
-{
-    kprintstr(str);
-    kputchar('\n');
-}
-
-void kprintnum(int64_t n)
-{
-    /* for 64-bit num it's enough*/
-    char n_str[30];
-    int idx = 30;
-
-    n_str[--idx] = '\0';
-
-    if (n < 0) {
-        kputchar('-');
-        n = -n;
-    }
-
-    do {
-        n_str[--idx] = (n % 10) + '0';
-        n /= 10;
-    } while (n);
-    
-    kprintstr(n_str + idx);
-}
-
-void kprinthex(uint64_t n)
-{
-    /* for 64-bit num it's enough*/
-    char n_str[30];
-    int idx = 30;
-
-    n_str[--idx] = '\0';
-
-    do {
-        uint64_t curr = n % 16;
-        if (curr >= 10) {
-            n_str[--idx] = curr - 10 + 'a';
-        } else {
-            n_str[--idx] = curr + '0';
-        }
-        n /= 16;
-    } while (n);
-    
-    kprintstr(n_str + idx);
-}
-
 void clear_screen(void)
 {
     for (int i = 0; i < CGA_TEXT_SIZE; i++) {
@@ -294,7 +240,7 @@ static void tty_serial_init(void)
 void tty_init(void)
 {
     /* Reuse the info at booting stage. */
-    text_mem = boot_text_mem;
+    text_mem = PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(boot_text_mem);
     display_mode = boot_display_mode;
     serial_exists = boot_serial_exists;
     cursor_loc = boot_cursor_loc;

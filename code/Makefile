@@ -28,7 +28,7 @@ all: prepare kernel.bin
 prepare:
 	mkdir -p $(OUT)
 
-kernel.bin: arch_file kernel_file
+kernel.bin: arch_file kernel_file mm_file lib_file
 	$(LD) -T linker.ld -o $(OUT)/$@ $(shell find $(OUT) -name *.o)
 
 arch_file:
@@ -36,6 +36,12 @@ arch_file:
 
 kernel_file:
 	make -C kernel/
+
+mm_file:
+	make -C mm/
+
+lib_file:
+	make -C lib/
 
 qemu: kernel.bin
 

@@ -29,6 +29,11 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
         return ;
     }
 
+    if ((uint64_t) mbi & 7) {
+        boot_puts("[x] UNALIGNED MBI!");
+        return ;
+    }
+
     boot_printstr("\t[+] multiboot2 magic detected: 0x");
     boot_printhex(magic);
 
@@ -36,5 +41,5 @@ void startup64(unsigned int magic, multiboot_uint8_t *mbi)
     boot_mm_init();
 
     /* enter the high men kernel now! */
-    main();
+    main(mbi);
 }

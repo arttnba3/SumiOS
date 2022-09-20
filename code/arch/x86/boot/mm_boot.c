@@ -15,8 +15,9 @@ extern void *boot_memset(uint8_t *dst, uint64_t sz, uint8_t val);
 
 extern uint64_t __boot_start, __kernel_end, __roseg_end, boot_page_table_pud;
 
-uint64_t boot_mem_total, boot_mem_alloc_start;
-phys_addr_t kern_pgtable;
+uint64_t boot_mem_total;
+phys_addr_t boot_mem_alloc_start;
+phys_addr_t boot_kern_pgtable;
 
 /**
  * Read from mc146818 CMOS
@@ -181,28 +182,36 @@ void boot_mm_pgtable_init(void)
     phys_addr_t kern_phys = 0;
     virt_addr_t kern_virt = KERNEL_BASE_ADDR;
 
-    kern_pgtable = boot_mm_alloc(PAGE_SIZE);
-    boot_memset(kern_pgtable, 0, PAGE_SIZE);
+    boot_kern_pgtable = boot_mm_alloc(PAGE_SIZE);
+    boot_memset(boot_kern_pgtable, 0, PAGE_SIZE);
 
     /* map for read-only region */
     while (kern_virt < (uint64_t) (&__roseg_end)) {
         //boot_printstr("map kern virt 0x");boot_printhex(kern_virt);
         //boot_printstr(" to phys 0x");boot_printhex(kern_phys);boot_puts("");
-        boot_pgtable_map(kern_pgtable, kern_virt, kern_phys, PAGE_ATTR_P);
+        boot_pgtable_map(boot_kern_pgtable, kern_virt, kern_phys, PAGE_ATTR_P);
         kern_virt += PAGE_SIZE;
         kern_phys += PAGE_SIZE;
     }
 
     /* map for read-write region */
     while (kern_virt < (uint64_t) (&__kernel_end)) {
-        boot_pgtable_map(kern_pgtable, kern_virt, kern_phys, 
+        boot_pgtable_map(boot_kern_pgtable, kern_virt, kern_phys, 
                         PAGE_ATTR_P | PAGE_ATTR_RW);
         kern_virt += PAGE_SIZE;
         kern_phys += PAGE_SIZE;
     }
 
+    /* map for the whole physical memory */
+    for (kern_virt = KERNEL_DIRECT_MAPPING_AREA, kern_phys = 0;
+        kern_phys < boot_mem_total;
+        kern_virt += PAGE_SIZE, kern_phys += PAGE_SIZE) {
+        boot_pgtable_map(boot_kern_pgtable, kern_virt, kern_phys, 
+                         PAGE_ATTR_P | PAGE_ATTR_RW);
+    }
+
     /* reget the boot page table in it, we'll clear it in virt kernel stage */
-    pgd = kern_pgtable;
+    pgd = boot_kern_pgtable;
     pgd[0] = (phys_addr_t) (&boot_page_table_pud);
     pgd[0] |= PAGE_ATTR_P | PAGE_ATTR_RW;
 
@@ -211,7 +220,7 @@ void boot_mm_pgtable_init(void)
         "mov    %0, %%rax;"
         "mov    %%rax, %%cr3;"
         :
-        : "a" (kern_pgtable)
+        : "a" (boot_kern_pgtable)
     );
 }
 

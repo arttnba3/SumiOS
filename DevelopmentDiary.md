@@ -47,5 +47,7 @@ Do you still remenber that in last diary I found the page table didn't work on t
 
 The point of solving this problem came at the time I tried to remap the start 2M like what I did in `boot.S` and it crashed as what used to appear on the high mem. It told me that the problem should be in `boot_get_pgtable_map_pa()` and I finally found out that I forgot to set the attributes for upper-level entries. So I quickly fixed it and successfully come to the high men area.
 
+Next come to the most important part: `memory management`. I may take a long time to complete...
+
 - Fix the bug in memory mapping in booting stage.
 
