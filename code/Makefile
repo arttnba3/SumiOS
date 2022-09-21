@@ -18,15 +18,18 @@ export CFLAGS
 INCLUDE := $(shell pwd)/include/
 ARCH_INCLUDE := $(shell pwd)/arch/x86/include/
 OUT := $(shell pwd)/out/
+ARCH_OUT := $(shell pwd)/out/arch/
 
 export INCLUDE
 export ARCH_INCLUDE
 export OUT
+export ARCH_OUT
 
 all: prepare kernel.bin
 
 prepare:
 	mkdir -p $(OUT)
+	mkdir -p $(ARCH_OUT)
 
 kernel.bin: arch_file kernel_file mm_file lib_file
 	$(LD) -T linker.ld -o $(OUT)/$@ $(shell find $(OUT) -name *.o)

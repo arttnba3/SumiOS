@@ -13,6 +13,8 @@ uint64_t total_mem = 0;
 struct page **pages;
 uint64_t pages_num;
 
+
+
 /* initialize the memory management subsystem */
 void mm_init(multiboot_uint8_t *mbi)
 {

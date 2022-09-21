@@ -11,12 +11,19 @@ enum {
     PAGE_BADRAM,
 };
 
+/**
+ * struct page
+ * - representing an existed physical page frame
+ */
 struct page {
     struct page *next;
     size_t flags;
     int ref_count;
     int map_count;
-    void **freelist;
+    union {
+        void **freelist;
+        void *virtual;
+    };
 };
 
 extern struct page **pages;
