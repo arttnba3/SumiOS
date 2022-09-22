@@ -11,6 +11,7 @@ int main(multiboot_uint8_t *mbi)
     kputs("\n\t[+] Successfully to enter the highmem kernel!\n");
 
     /* init memory management */
+    kprintf("\t[*] mbi at %p\n", mbi);
     mm_init(mbi);
     kputs("\n\t[+] kernel memory initialization complete.");
 

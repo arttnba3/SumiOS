@@ -11,7 +11,7 @@ extern void boot_puts(char *str);
 extern void boot_printnum(int64_t n);
 extern void boot_printhex(uint64_t n);
 
-extern void *boot_memset(uint8_t *dst, uint64_t sz, uint8_t val);
+extern void *boot_memset(uint8_t *dst, uint8_t val, uint64_t sz);
 
 extern uint64_t __boot_start, __kernel_end, __roseg_end, boot_page_table_pud;
 
@@ -222,6 +222,8 @@ void boot_mm_pgtable_init(void)
         :
         : "a" (boot_kern_pgtable)
     );
+
+    boot_puts("\t[+] booting-kernel page table initialization done!");
 }
 
 void boot_mm_init(void)
@@ -242,7 +244,7 @@ void boot_mm_init(void)
     
     /* we want a PAGE-aligned allocation start there */
     boot_mem_alloc_start = \
-                    ALIGN(((uint64_t) &__boot_start) + kernel_size, PAGE_SIZE);
+        ALIGN(((uint64_t) &__boot_start) + kernel_size + PAGE_SIZE, PAGE_SIZE);
     boot_printstr("\t[*] booting memory allocate from 0x");
     boot_printhex(boot_mem_alloc_start);
     boot_puts("");

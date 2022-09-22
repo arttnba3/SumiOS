@@ -51,3 +51,15 @@ Next come to the most important part: `memory management`. I may take a long tim
 
 - Fix the bug in memory mapping in booting stage.
 
+## Sep 22, 2022
+
+It seems that I may have made some mistakes while initializing the kernel memory. So I worked hard today to solve those fucking bugs and continue to complete the memory management system.
+
+The first mistake I made is that I tried to make a fully mapping of the whole physical memory on a specific virtual address space called `direct mapping area` (just like what Linux does), so I simply add this in `boot_mm_pgtable_init()` and forgot that it's not depending on the real memory information provided by the multiboot2 tags but the simple CMOS, which is not accurate. So I decided to replace it with the information from multiboot2 tags.
+
+The second bug happened in `boot_pgtable_map()`, which works correctly for mapping the kernel images but works like a shit while mapping for direct mapping area, and the problem appeared unexpectedly because everything seemed okay when I finished the mapping of direct mapping area at home, and the shit hit me when I pull my code to my working laptop at my workspace. I didn't know why it happened because it works well while mapping for the kernel image, right? So I made a breakpoint and found out that it referred an invalid address while reading the page table. But the exact address it tried to read is a strange val, how and why? After I checked the code again and made sure that there's no OOB read or write, the reason come out: the page table hadn't been initialized properly because I wrote the `memset()` as `memset(uint8_t *dst, uint64_t sz, uint8_t val)` and used it as `memset(uint8_t *dst, uint8_t val, uint64_t sz)`. Fortunately the problem finally got found and fixed.
+
+The third problem is that on my own computer there're several multiboot2 tags indicating variable memory areas, but on my working laptop it got no tags available. But I don't know why because I use the QEMU to run the kernel with the same arguments. So I check again and find out that the multiboot2 tags had been cleared by the fixed memset() because my `boot_mm_alloc()` allocates from the end of kernel image, and the GRUB put the multiboot2 tags on it, too. So I reserve a page for it and the multiboot2 tags appeared correctly again.
+
+- fix bugs in memory initialization.
+- fix bugs in memset().

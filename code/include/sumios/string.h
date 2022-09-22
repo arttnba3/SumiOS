@@ -3,7 +3,7 @@
 
 #include <sumios/kernel.h>
 
-void *memset(uint8_t *dst, uint64_t sz, uint8_t val);
+void *memset(uint8_t *dst, uint8_t val, uint64_t sz);
 size_t strlen(const char *str);
 
 #endif
