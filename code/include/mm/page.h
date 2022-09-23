@@ -4,7 +4,7 @@
 #include <sumios/kernel.h>
 
 enum {
-    PAGE_RAM, 
+    PAGE_RAM = 1, 
     PAGE_RESERVED,
     PAGE_ACPI_RECLAIMABLE,
     PAGE_NVS,
@@ -26,7 +26,7 @@ struct page {
     };
 };
 
-extern struct page **pages;
+extern struct page *pages;
 extern uint64_t pages_num;
 
 #endif

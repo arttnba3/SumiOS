@@ -95,7 +95,9 @@ void *boot_mm_alloc(uint64_t sz)
         boot_puts("[x] bad size!");
         return NULL;
     }
-    if (((ALIGN(sz, PAGE_SIZE) + boot_mem_alloc_start) >= boot_mem_total)) {
+
+    sz = ALIGN(sz, PAGE_SIZE);
+    if (((sz + boot_mem_alloc_start) >= boot_mem_total)) {
         boot_printstr("[x] sz round up to: ");
         boot_printhex(ALIGN(sz, PAGE_SIZE) + boot_mem_alloc_start);
         boot_puts(", that\'s too big!");
@@ -103,7 +105,7 @@ void *boot_mm_alloc(uint64_t sz)
     }
 
     chunk = (void*) boot_mem_alloc_start;
-    boot_mem_alloc_start += ALIGN(sz, PAGE_SIZE);
+    boot_mem_alloc_start += sz;
 
     return chunk;
 }
