@@ -204,9 +204,9 @@ void boot_mm_pgtable_init(void)
         kern_phys += PAGE_SIZE;
     }
 
-    /* map for the whole physical memory */
+    /* map for the 10MB direct mapping memory temporarily */
     for (kern_virt = KERNEL_DIRECT_MAPPING_AREA, kern_phys = 0;
-        kern_phys < boot_mem_total;
+        kern_phys < 0xa00000;
         kern_virt += PAGE_SIZE, kern_phys += PAGE_SIZE) {
         boot_pgtable_map(boot_kern_pgtable, kern_virt, kern_phys, 
                          PAGE_ATTR_P | PAGE_ATTR_RW);

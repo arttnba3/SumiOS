@@ -55,7 +55,7 @@ Next come to the most important part: `memory management`. I may take a long tim
 
 It seems that I may have made some mistakes while initializing the kernel memory. So I worked hard today to solve those fucking bugs and continue to complete the memory management system.
 
-The first mistake I made is that I tried to make a fully mapping of the whole physical memory on a specific virtual address space called `direct mapping area` (just like what Linux does), so I simply add this in `boot_mm_pgtable_init()` and forgot that it's not depending on the real memory information provided by the multiboot2 tags but the simple CMOS, which is not accurate. So I decided to replace it with the information from multiboot2 tags.
+The first mistake I made is that I tried to make a fully mapping of the whole physical memory on a specific virtual address space called `direct mapping area` (just like what Linux does), so I simply add this in `boot_mm_pgtable_init()` and forgot that it's not depending on the real memory information provided by the multiboot2 tags but the simple CMOS, which is not accurate. So I decided to just map a little part of memory in the `boot_mm_pgtable_init()` and make the full mapping later in `mm_init()` by the information from multiboot2 tags.
 
 The second bug happened in `boot_pgtable_map()`, which works correctly for mapping the kernel images but works like a shit while mapping for direct mapping area, and the problem appeared unexpectedly because everything seemed okay when I finished the mapping of direct mapping area at home, and the shit hit me when I pull my code to my working laptop at my workspace. I didn't know why it happened because it works well while mapping for the kernel image, right? So I made a breakpoint and found out that it referred an invalid address while reading the page table. But the exact address it tried to read is a strange val, how and why? After I checked the code again and made sure that there's no OOB read or write, the reason come out: the page table hadn't been initialized properly because I wrote the `memset()` as `memset(uint8_t *dst, uint64_t sz, uint8_t val)` and used it as `memset(uint8_t *dst, uint8_t val, uint64_t sz)`. Fortunately the problem finally got found and fixed.
 
@@ -63,3 +63,17 @@ The third problem is that on my own computer there're several multiboot2 tags in
 
 - fix bugs in memory initialization.
 - fix bugs in memset().
+
+## Sep 23, 2022
+
+I'm always thinking about how to representing the whole memory in kernel space, and finally decided to create a `page` structure for each page frame, just like what Linux and XV6 does. And use a continuous array in virtual address space to store these `page` structures.
+
+For storing these unexpected-count `page` structures, I choose to put then on a specific area starts at `0xffff800000000000` and allocate the memory dynamically by checking whether there's a mapping for the `page[i]` in page table. And I use a simple linear memory allocator `mm_phys_alloc_linear()` to allocate the page-aligned temporarily. It judges the free memory according to the multiboot2 tags.
+
+There's no doubt that my code consists of shit, so an unexpected disaster appeared while initializing the pages struct. Fortunately I spent hours and finally locate it in the macro `PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR()`.
+
+Now the basic part of memory management has finished. For next it'll be the allocator: `buddy` and `slub`, the best algorithm I have seen.
+
+- fix bugs of macro `PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR()`
+- add basic linear physical memory allocator
+- add basic function of memory mapping
