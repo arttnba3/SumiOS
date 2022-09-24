@@ -2,6 +2,7 @@
 #define MM_PAGE_TABLE_H
 
 #include <sumios/types.h>
+#include <mm/types.h>
 
 /* page table types */
 typedef size_t pgd_t;
@@ -25,5 +26,9 @@ typedef size_t page_attr_t;
 #define PMD_ENTRY(addr) ((addr >> PMD_OFFSET) & PT_ENTRY_MASK)
 #define PUD_ENTRY(addr) ((addr >> PUD_OFFSET) & PT_ENTRY_MASK)
 #define PGD_ENTRY(addr) ((addr >> PGD_OFFSET) & PT_ENTRY_MASK)
+
+phys_addr_t mm_pgtable_get_va_pte(phys_addr_t pgtable, virt_addr_t va);
+void mm_pgtable_map(phys_addr_t pgtable, virt_addr_t va, phys_addr_t pa, 
+                    page_attr_t attr);
 
 #endif

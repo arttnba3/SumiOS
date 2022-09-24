@@ -5,9 +5,6 @@
 #include <mm/page_table.h>
 #include <mm/layout.h>
 #include <mm/page.h>
-
-typedef size_t virt_addr_t;
-typedef size_t phys_addr_t;
-typedef size_t dma_addr_t;
+#include <mm/types.h>
 
 #endif

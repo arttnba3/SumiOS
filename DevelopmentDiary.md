@@ -72,7 +72,7 @@ For storing these unexpected-count `page` structures, I choose to put then on a 
 
 There's no doubt that my code consists of shit, so an unexpected disaster appeared while initializing the pages struct. Fortunately I spent hours and finally locate it in the macro `PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR()`.
 
-Now the basic part of memory management has finished. For next it'll be the allocator: `buddy` and `slub`, the best algorithm I have seen.
+Now the basic part of memory management has finished. For next it'll be the allocator: `buddy` and `slub`, the most beautiful algorithm I have ever seen.
 
 - fix bugs of macro `PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR()`
 - add basic linear physical memory allocator
