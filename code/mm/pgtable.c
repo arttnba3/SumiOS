@@ -2,6 +2,8 @@
 #include <mm/mm.h>
 #include <mm/layout.h>
 
+phys_addr_t kern_pgtable;
+
 /* Get the PTE of a specific virtual address */
 phys_addr_t mm_pgtable_get_va_pte(phys_addr_t pgtable, virt_addr_t va)
 {

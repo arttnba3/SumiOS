@@ -6,10 +6,8 @@
 extern phys_addr_t boot_kern_pgtable;
 extern phys_addr_t boot_mem_alloc_start, boot_mem_total;
 
-phys_addr_t kern_pgtable;
-uint64_t total_mem = 0;
-struct page *pages = KERNEL_PAGE_ARRAY;
-uint64_t pages_num;
+extern phys_addr_t kern_pgtable;
+extern struct page *pages;
 
 static phys_addr_t mm_alloc_start = -1;
 static phys_addr_t mm_alloc_end;
