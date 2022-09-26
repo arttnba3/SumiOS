@@ -77,3 +77,7 @@ Now the basic part of memory management has finished. For next it'll be the allo
 - fix bugs of macro `PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR()`
 - add basic linear physical memory allocator
 - add basic function of memory mapping
+
+## Sep 26, 2022
+
+The memory management has taken more time than I'd ever thought.

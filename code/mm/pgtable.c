@@ -1,5 +1,6 @@
 #include <sumios/kernel.h>
 #include <mm/mm.h>
+#include <mm/page_alloc.h>
 #include <mm/layout.h>
 
 phys_addr_t kern_pgtable;
@@ -56,19 +57,19 @@ void mm_pgtable_map(phys_addr_t pgtable, virt_addr_t va, phys_addr_t pa,
      */
     pgd = PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgtable);
     if (!pgd[pgd_i]) {
-        pgd[pgd_i] = mm_phys_alloc_linear(PAGE_SIZE);
+        pgd[pgd_i] = mm_phys_alloc(PAGE_SIZE);
         memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgd[pgd_i]), 0, PAGE_SIZE);
         pgd[pgd_i] |= attr;
     }
     pud = PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgd[pgd_i] & PAGE_MASK);
     if (!pud[pud_i]) {
-        pud[pud_i] = mm_phys_alloc_linear(PAGE_SIZE);
+        pud[pud_i] = mm_phys_alloc(PAGE_SIZE);
         memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pud[pud_i]), 0, PAGE_SIZE);
         pud[pud_i] |= attr;
     }
     pmd = PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pud[pud_i] & PAGE_MASK);
     if (!pmd[pmd_i]) {
-        pmd[pmd_i] = mm_phys_alloc_linear(PAGE_SIZE);
+        pmd[pmd_i] = mm_phys_alloc(PAGE_SIZE);
         memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pmd[pmd_i]), 0, PAGE_SIZE);
         pmd[pmd_i]|= attr;
     }

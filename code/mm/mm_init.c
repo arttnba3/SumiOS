@@ -27,7 +27,7 @@ static int phys_mm_area_idx = 0;
  * @param sz the size to alloc. it'll be round up to page-aligned
  * @return void* :the allocated memory, NULL for failing
  */
-void *mm_phys_alloc_linear(uint64_t sz)
+void *mm_init_phys_alloc_linear(uint64_t sz)
 {
     void *chunk;
 
@@ -64,11 +64,85 @@ void *mm_phys_alloc_linear(uint64_t sz)
 
         if (phys_mm_area_idx == phys_mm_area_num) {
             kputs("[x] We have run out all of the memory!");
+            return NULL;
         }
     }
 
     return chunk;
 }
+
+/* Get the PTE of a specific virtual address */
+static phys_addr_t mm_init_pgtable_get_pa(phys_addr_t pgtable, virt_addr_t va)
+{
+    pgd_t *pgd;
+    pud_t *pud;
+    pmd_t *pmd;
+    pte_t *pte;
+    int pgd_i = PGD_ENTRY(va);
+    int pud_i = PUD_ENTRY(va);
+    int pmd_i = PMD_ENTRY(va);
+    int pte_i = PTE_ENTRY(va);
+
+    pgd = (pgd_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgtable);
+    if (!pgd[pgd_i]) {
+        return -1;
+    }
+    pud = (pud_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgd[pgd_i] & PAGE_MASK);
+    if (!pud[pud_i]) {
+        return -1;
+    }
+    pmd = (pmd_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pud[pud_i] & PAGE_MASK);
+    if (!pmd[pmd_i]) {
+        return -1;
+    }
+    pte = (pte_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pmd[pmd_i] & PAGE_MASK);
+    /* we ONLY map this address to zero page */
+    if (!(pte[pte_i] & PAGE_MASK) && !KERNEL_VA_IS_PHYS_ZERO(va)) {
+        return -1;
+    }
+
+    return pte[pte_i] & PAGE_MASK;
+}
+
+/* map for single page */
+static void mm_init_pgtable_map(phys_addr_t pgtable, virt_addr_t va, 
+                                phys_addr_t pa, page_attr_t attr)
+{
+    pgd_t *pgd;
+    pud_t *pud;
+    pmd_t *pmd;
+    pte_t *pte;
+    int pgd_i = PGD_ENTRY(va);
+    int pud_i = PUD_ENTRY(va);
+    int pmd_i = PMD_ENTRY(va);
+    int pte_i = PTE_ENTRY(va);
+
+    /**
+     * don't FORGET to set the attr for each level's entry!
+     * don't FORGET to access it by the virtual address!
+     */
+    pgd = (pgd_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgtable);
+    if (!pgd[pgd_i]) {
+        pgd[pgd_i] = mm_init_phys_alloc_linear(PAGE_SIZE);
+        memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgd[pgd_i]), 0, PAGE_SIZE);
+        pgd[pgd_i] |= attr;
+    }
+    pud = (pud_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pgd[pgd_i] & PAGE_MASK);
+    if (!pud[pud_i]) {
+        pud[pud_i] = mm_init_phys_alloc_linear(PAGE_SIZE);
+        memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pud[pud_i]), 0, PAGE_SIZE);
+        pud[pud_i] |= attr;
+    }
+    pmd = (pmd_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pud[pud_i] & PAGE_MASK);
+    if (!pmd[pmd_i]) {
+        pmd[pmd_i] = mm_init_phys_alloc_linear(PAGE_SIZE);
+        memset(PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pmd[pmd_i]), 0, PAGE_SIZE);
+        pmd[pmd_i]|= attr;
+    }
+    pte = (pte_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pmd[pmd_i] & PAGE_MASK);
+    pte[pte_i] = pa | attr;
+}
+
 
 /* initialize the memory management subsystem */
 void mm_init(multiboot_uint8_t *mbi)
@@ -81,6 +155,7 @@ void mm_init(multiboot_uint8_t *mbi)
 
     /* We can just reuse the old page table for kernel */
     kern_pgtable = boot_kern_pgtable;
+    kprintf("size of struct page: %d\n", sizeof(struct page));
 
     /**
      * Because we cannot use e820 and some other BIOS interrupts
@@ -148,8 +223,9 @@ void mm_init(multiboot_uint8_t *mbi)
         for (size_t pa = mmap_entry->addr;
             pa < (mmap_entry->addr + mmap_entry->len);
             pa += PAGE_SIZE) {
-            mm_pgtable_map(kern_pgtable, PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pa),
-                           pa, PAGE_ATTR_RW | PAGE_ATTR_P);
+            mm_init_pgtable_map(kern_pgtable, 
+                                PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(pa),
+                                pa, PAGE_ATTR_RW | PAGE_ATTR_P);
         }
     }
 
@@ -169,13 +245,15 @@ void mm_init(multiboot_uint8_t *mbi)
             struct page *p = &pages[idx];
 
             /* alloc space for pages struct */
-            if (mm_pgtable_get_va_pte(kern_pgtable, p) == -1) {
-                phys_addr_t s = mm_phys_alloc_linear(PAGE_SIZE);
-                mm_pgtable_map(kern_pgtable, p, s, PAGE_ATTR_P | PAGE_ATTR_RW);
+            if (mm_init_pgtable_get_pa(kern_pgtable, p) == -1) {
+                phys_addr_t s = mm_init_phys_alloc_linear(PAGE_SIZE);
+                mm_init_pgtable_map(kern_pgtable, p, s, 
+                                    PAGE_ATTR_P | PAGE_ATTR_RW);
             }
 
             p->ref_count = -1;
             p->flags = mmap_entry->type;
+            p->list.next = p->list.prev = NULL;
         }
     }
 

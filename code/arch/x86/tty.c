@@ -240,7 +240,7 @@ static void tty_serial_init(void)
 void tty_init(void)
 {
     /* Reuse the info at booting stage. */
-    text_mem = PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(boot_text_mem);
+    text_mem = (uint16_t*) PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(boot_text_mem);
     display_mode = boot_display_mode;
     serial_exists = boot_serial_exists;
     cursor_loc = boot_cursor_loc;

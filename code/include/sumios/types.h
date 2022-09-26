@@ -13,6 +13,11 @@ typedef signed long long    int64_t;
 typedef unsigned long   size_t;
 typedef signed long     ssize_t;
 
+struct list_head {
+    struct list_head *next;
+    struct list_head *prev;
+};
+
 #define NULL ((void*)0)
 
 #endif
