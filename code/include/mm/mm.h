@@ -7,4 +7,7 @@
 #include <mm/page.h>
 #include <mm/types.h>
 
+struct page *__alloc_pages(unsigned int order);
+void __free_pages(struct page *p, unsigned int order);
+
 #endif

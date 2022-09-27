@@ -155,7 +155,6 @@ void mm_init(multiboot_uint8_t *mbi)
 
     /* We can just reuse the old page table for kernel */
     kern_pgtable = boot_kern_pgtable;
-    kprintf("size of struct page: %d\n", sizeof(struct page));
 
     /**
      * Because we cannot use e820 and some other BIOS interrupts
@@ -261,7 +260,22 @@ void mm_init(multiboot_uint8_t *mbi)
      * We have used some pages while initialize pages' array, so we donot count
      * that during initialization but after it.
      */
-    /* TODO: initialize the buddy system */
+    for (phys_addr_t i = sizeof(struct multiboot_tag_mmap); 
+        i < tags->size; 
+        i += sizeof(struct multiboot_mmap_entry)) {
+        mmap_entry = ((uint64_t)mmap_info) + i;
+        for (size_t start = mmap_entry->addr;
+            start < (mmap_entry->addr + mmap_entry->len);
+            start += PAGE_SIZE) {
+            size_t idx = start / PAGE_SIZE;
+            struct page *p = &pages[idx];
+
+            if (start >= mm_alloc_end 
+                && mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                __free_pages(p, 0);
+            }
+        }
+    }
 
     /* unmap the old phys part */
     ((pgd_t*) kern_pgtable)[0] = NULL;

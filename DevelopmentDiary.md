@@ -81,3 +81,12 @@ Now the basic part of memory management has finished. For next it'll be the allo
 ## Sep 26, 2022
 
 The memory management has taken more time than I'd ever thought.
+
+## Sep 27, 2022
+
+The memory management subsystem is much more complex than I have ecer thought. I have just done a basic model now and it doesn't work correctly so far, I need to fix it later.
+
+And I tried to complete something related to specific ISA today, and it took me lots of time. So I decided to complete it step by step.
+
+- add basic structure for ISA related initialization.
+- add basic structure for buddy system.

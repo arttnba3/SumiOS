@@ -2,6 +2,7 @@
 #define MM_PAGE_H
 
 #include <sumios/kernel.h>
+#include <mm/types.h>
 
 enum {
     PAGE_RAM = 1, 

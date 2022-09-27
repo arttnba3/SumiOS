@@ -8,6 +8,7 @@
         "mm.h": "c",
         "page_table.h": "c",
         "page_types.h": "c",
-        "page.h": "c"
+        "page.h": "c",
+        "io.h": "c"
     }
 }
