@@ -19,7 +19,7 @@ void freelist_init(void)
     }
 }
 
-struct page *next_page_by_order(struct page *p, unsigned int order)
+struct page *next_page_by_order(struct page *p, int order)
 {
     if (order >= MAX_PAGE_ORDER) {
         return NULL;
@@ -28,7 +28,7 @@ struct page *next_page_by_order(struct page *p, unsigned int order)
     return p + (1 << order);
 }
 
-struct page *prev_page_by_order(struct page *p, unsigned int order)
+struct page *prev_page_by_order(struct page *p, int order)
 {
     if (order >= MAX_PAGE_ORDER) {
         return NULL;
@@ -43,7 +43,7 @@ struct page *prev_page_by_order(struct page *p, unsigned int order)
  * @param order the order of memory allocation
  * @return struct page* pointer to the page struct, NULL for failed
  */
-static struct page *__alloc_page_direct(unsigned int order)
+static struct page *__alloc_page_direct(int order)
 {
     struct page *p = NULL;
     int __alloc = order;
@@ -53,9 +53,9 @@ static struct page *__alloc_page_direct(unsigned int order)
             p = list_entry(freelist[__alloc].next, struct page, list);
             list_del(&p->list);
             break;
+        } else {
+            __alloc++;
         }
-
-        __alloc++;
     }
 
     /* failed */
@@ -63,9 +63,14 @@ static struct page *__alloc_page_direct(unsigned int order)
         goto out;
     }
 
-    while (__alloc > order) {
-        list_add_next(&freelist[__alloc], next_page_by_order(p, __alloc - 1));
+    /* it means that we acquire pages from higher order */
+    if (__alloc != order) {
+        /* put half pages back to buddy */
         __alloc--;
+        while (__alloc >= order) {
+            list_add_next(&freelist[__alloc], next_page_by_order(p, __alloc));
+            __alloc--;
+        }
     }
 
 out:
@@ -78,7 +83,7 @@ static void __reclaim_memory(void)
 }
 
 /* This is the `heart` of buddy system allocation */
-static struct page *__alloc_pages(unsigned int order)
+static struct page *__alloc_pages(int order)
 {
     struct page *p = NULL;
 
@@ -105,7 +110,7 @@ out:
 }
 
 /* This is the `heart` of buddy system free */
-static void __free_pages(struct page *p, unsigned int order)
+static void __free_pages(struct page *p, int order)
 {
     if (!p) {
         return;
@@ -116,6 +121,7 @@ static void __free_pages(struct page *p, unsigned int order)
         return;
     }
 
+    /* try to combine nearby pages */
     while (order < (MAX_PAGE_ORDER - 1)) {
         struct page *next, *prev;
 
@@ -148,7 +154,7 @@ static void __free_pages(struct page *p, unsigned int order)
     p->is_free = p->is_head = true;
 }
 
-struct page *alloc_pages(unsigned int order)
+struct page *alloc_pages(int order)
 {
     struct page *p;
 
@@ -161,7 +167,7 @@ struct page *alloc_pages(unsigned int order)
     return p;
 }
 
-void free_pages(struct page *p, unsigned int order)
+void free_pages(struct page *p, int order)
 {
     spin_lock(&freelist_lock);
     __free_pages(p, order);

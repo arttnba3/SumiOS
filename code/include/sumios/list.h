@@ -64,7 +64,7 @@ static inline void list_head_init(struct list_head *entry)
 
 static inline bool list_empty(struct list_head *entry)
 {
-    return entry->next == entry && entry->prev == entry;
+    return (entry->next == entry) && (entry->prev == entry);
 }
 
 #endif

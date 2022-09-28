@@ -93,9 +93,12 @@ And I tried to complete something related to specific ISA today, and it took me 
 
 ## Sep 28, 2022
 
-It's been busy again recently. Fortunately I have completed the basic buddy system and fixed existed bugs today and it seems that everything works well. But when I tried to allocate the order 10 pages, the system crashed unexpected. I'm still working hard to find out the reason why.
+It's been busy again recently. Fortunately I have completed the basic buddy system and fixed existed bugs today and it seems that everything works well. There's no doubt that some bugs appeared but finally they all got fixed.
 
 And I add the basic implementation of spin lock, with the basic implementation of atomic operations. I used to think of implementing it with atomic assembly code like `lock;`, but I found that the gcc provided useful inner functions like `__sync_bool_compare_and_swap`. So I just use them to implement the atomic operations.
 
-- fix old bugs in buddy system, add new bug into it
+One more thing is that I forgot to migrate the `boot_stack` to high mem, but it seems that nothing happen even if I have unmapped the start entries of kernel page table. I don't know why it didn't crash while accessing on an invalid stack, but it's better to fix it before it really effects.
+
+- fix bugs in buddy system
 - add basic atomic operations
+- migrate `boot_stack` to highmem

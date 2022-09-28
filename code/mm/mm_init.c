@@ -286,13 +286,5 @@ void mm_init(multiboot_uint8_t *mbi)
     }
 
     /* unmap the old phys part */
-    //((pgd_t*) kern_pgtable)[0] = NULL;
-
-    /* test */
-    kputs("test for buddy system...");
-
-    for (int i = 0; i < 0x1000; i++) {
-        free_pages(alloc_pages(i % MAX_PAGE_ORDER), i % MAX_PAGE_ORDER);
-        kprintf("[=] test for NO.%d time succeeded!\n", i);
-    }
+    ((pgd_t*) kern_pgtable)[0] = NULL;
 }

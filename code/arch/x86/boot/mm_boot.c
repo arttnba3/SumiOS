@@ -253,4 +253,8 @@ void boot_mm_init(void)
 
     /* now we start to allocate a page table for kernel space from highmem */
     boot_mm_pgtable_init();
+
+    /* remap the kernel stack to highmem */
+    asm volatile("addq %0, %%rsp" :: "r"(KERNEL_BASE_ADDR));
+    asm volatile("addq %0, %%rbp" :: "r"(KERNEL_BASE_ADDR));
 }
