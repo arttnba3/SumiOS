@@ -90,3 +90,12 @@ And I tried to complete something related to specific ISA today, and it took me 
 
 - add basic structure for ISA related initialization.
 - add basic structure for buddy system.
+
+## Sep 28, 2022
+
+It's been busy again recently. Fortunately I have completed the basic buddy system and fixed existed bugs today and it seems that everything works well. But when I tried to allocate the order 10 pages, the system crashed unexpected. I'm still working hard to find out the reason why.
+
+And I add the basic implementation of spin lock, with the basic implementation of atomic operations. I used to think of implementing it with atomic assembly code like `lock;`, but I found that the gcc provided useful inner functions like `__sync_bool_compare_and_swap`. So I just use them to implement the atomic operations.
+
+- fix old bugs in buddy system, add new bug into it
+- add basic atomic operations

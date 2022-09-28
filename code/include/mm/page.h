@@ -19,7 +19,11 @@ enum {
  */
 struct page {
     struct list_head list;
-    size_t flags;
+    struct {
+        unsigned type: 8;
+        unsigned is_free: 1;
+        unsigned is_head: 1;
+    };
     int ref_count;
     int map_count;
     union {
@@ -28,7 +32,7 @@ struct page {
     };
     /* unused area to make it page-aligned, maybe we can put sth else there? */
     size_t unused[3];
-};
+} __attribute__((aligned(16)));
 
 extern struct page *pages;
 extern uint64_t pages_num;

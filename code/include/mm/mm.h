@@ -9,5 +9,6 @@
 
 struct page *__alloc_pages(unsigned int order);
 void __free_pages(struct page *p, unsigned int order);
+void freelist_init(void);
 
 #endif

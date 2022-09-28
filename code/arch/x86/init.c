@@ -1,5 +1,6 @@
 #include <sumios/kernel.h>
 #include <mm/types.h>
+#include <mm/layout.h>
 #include <asm/io.h>
 
 /**
@@ -14,7 +15,7 @@ static void gdt_init(void)
     };
     phys_addr_t gdt_addr;
 
-    asm volatile("lgdtq %0" :: "m" (global_descriptor_table));
+    asm volatile("lgdtq %0" :: "m"(gdt_addr));
 }
 
 static void idt_init(void)

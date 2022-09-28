@@ -1,5 +1,7 @@
 #include <sumios/kernel.h>
+#include <sumios/lock.h>
 #include <mm/mm.h>
+#include <mm/page_alloc.h>
 #include <mm/layout.h>
 #include <boot/multiboot2.h>
 
@@ -8,6 +10,7 @@ extern phys_addr_t boot_mem_alloc_start, boot_mem_total;
 
 extern phys_addr_t kern_pgtable;
 extern struct page *pages;
+extern spinlock_t freelist_lock;
 
 static phys_addr_t mm_alloc_start = -1;
 static phys_addr_t mm_alloc_end;
@@ -250,9 +253,11 @@ void mm_init(multiboot_uint8_t *mbi)
                                     PAGE_ATTR_P | PAGE_ATTR_RW);
             }
 
+            /* init page struct */
             p->ref_count = 0;
-            p->flags = mmap_entry->type;
-            p->list.next = p->list.prev = NULL;
+            p->type = mmap_entry->type;
+            list_head_init(&p->list);
+            p->is_free = false;
         }
     }
 
@@ -260,6 +265,9 @@ void mm_init(multiboot_uint8_t *mbi)
      * We have used some pages while initialize pages' array, so we donot count
      * that during initialization but after it.
      */
+    freelist_init();
+    spin_lock_init(&freelist_lock);
+
     for (phys_addr_t i = sizeof(struct multiboot_tag_mmap); 
         i < tags->size; 
         i += sizeof(struct multiboot_mmap_entry)) {
@@ -270,14 +278,21 @@ void mm_init(multiboot_uint8_t *mbi)
             size_t idx = start / PAGE_SIZE;
             struct page *p = &pages[idx];
 
-            if (start >= mm_alloc_end 
+            if (start >= mm_alloc_end
                 && mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
-                kprintf("[*] free page: %p\n", p);
-                __free_pages(p, 0);
+                free_pages(p, 0);
             }
         }
     }
 
     /* unmap the old phys part */
-    ((pgd_t*) kern_pgtable)[0] = NULL;
+    //((pgd_t*) kern_pgtable)[0] = NULL;
+
+    /* test */
+    kputs("test for buddy system...");
+
+    for (int i = 0; i < 0x1000; i++) {
+        free_pages(alloc_pages(i % MAX_PAGE_ORDER), i % MAX_PAGE_ORDER);
+        kprintf("[=] test for NO.%d time succeeded!\n", i);
+    }
 }

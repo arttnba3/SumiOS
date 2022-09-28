@@ -55,4 +55,16 @@ static inline void list_del(struct list_head *entry)
     __list_del(entry);
 }
 
+/* initialize the head node of a list */
+static inline void list_head_init(struct list_head *entry)
+{
+    entry->next = entry;
+    entry->prev = entry;
+}
+
+static inline bool list_empty(struct list_head *entry)
+{
+    return entry->next == entry && entry->prev == entry;
+}
+
 #endif
