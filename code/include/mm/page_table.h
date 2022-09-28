@@ -31,4 +31,6 @@ phys_addr_t mm_pgtable_get_va_pte(phys_addr_t pgtable, virt_addr_t va);
 void mm_pgtable_map(phys_addr_t pgtable, virt_addr_t va, phys_addr_t pa, 
                     page_attr_t attr);
 
+extern phys_addr_t kern_pgtable;
+
 #endif

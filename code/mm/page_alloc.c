@@ -86,7 +86,10 @@ void __free_pages(struct page *p, unsigned int order)
 
     while (order < MAX_PAGE_ORDER) {
         struct page *next = next_page_by_order(p, order);
-        if (next->ref_count == -1) {
+        if (mm_pgtable_get_va_pte(kern_pgtable, p) == -1) {
+            break;
+        }
+        else if (next->ref_count == -1) {
             list_del(&next->list);
             order++;
         } else {

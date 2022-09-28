@@ -250,7 +250,7 @@ void mm_init(multiboot_uint8_t *mbi)
                                     PAGE_ATTR_P | PAGE_ATTR_RW);
             }
 
-            p->ref_count = -1;
+            p->ref_count = 0;
             p->flags = mmap_entry->type;
             p->list.next = p->list.prev = NULL;
         }
@@ -272,6 +272,7 @@ void mm_init(multiboot_uint8_t *mbi)
 
             if (start >= mm_alloc_end 
                 && mmap_entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                kprintf("[*] free page: %p\n", p);
                 __free_pages(p, 0);
             }
         }
