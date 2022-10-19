@@ -9,6 +9,8 @@
         "page_table.h": "c",
         "page_types.h": "c",
         "page.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "segment.h": "c",
+        "desc.h": "c"
     }
 }

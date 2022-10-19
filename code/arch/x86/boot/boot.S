@@ -3,11 +3,11 @@
 
 #define MULTIBOOT2_HEADER_MAGIC (0xe85250d6)
 #define GRUB_MULTIBOOT_ARCHITECTURE_I386 (0)
-#define HULTIBOOT2_HEADER_LENGTH (multiboot_header_end - multiboot_header)
+#define MULTIBOOT2_HEADER_LENGTH (multiboot_header_end - multiboot_header)
 #define SUMIOS_CHECKSUM \
     -(MULTIBOOT2_HEADER_MAGIC \
     + GRUB_MULTIBOOT_ARCHITECTURE_I386 \
-    + HULTIBOOT2_HEADER_LENGTH)
+    + MULTIBOOT2_HEADER_LENGTH)
 #define MULTIBOOT2_HEADER_ALIGN 8
 
 .extern long_mode_entry
@@ -18,7 +18,7 @@
     multiboot_header:
         .long   MULTIBOOT2_HEADER_MAGIC
         .long   GRUB_MULTIBOOT_ARCHITECTURE_I386
-        .long   HULTIBOOT2_HEADER_LENGTH
+        .long   MULTIBOOT2_HEADER_LENGTH
         .long   SUMIOS_CHECKSUM
     tags_end:
         .short  0
