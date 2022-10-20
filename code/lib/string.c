@@ -10,6 +10,17 @@ void *memset(uint8_t *dst, uint8_t val, uint64_t sz)
     return dst;
 }
 
+void *memcpy(uint8_t *dst, uint8_t *src, uint64_t sz)
+{
+    uint8_t *res = dst;
+
+    while (sz--) {
+        *dst++ = *src++;
+    }
+
+    return res;
+}
+
 size_t strlen(const char *str)
 {
     size_t res = 0;

@@ -12,6 +12,7 @@
         "io.h": "c",
         "segment.h": "c",
         "desc.h": "c",
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "trap.h": "c"
     }
 }

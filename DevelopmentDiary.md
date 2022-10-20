@@ -109,4 +109,9 @@ I've almost forgot there's an uncompleted kernel here because of continuously co
 
 I'm still struglling against the part that related to the architecture, only x86-64 is in a half-completed stage. I wish to add supports for more ISA in the future.
 
+The part of handling interrupt cost me plenty of time. The system developed by Intel is much more burdensome than I've ever thought. So it seems that the interrupt handler needs more time to be completed.
+
 - add gdt initialization
+
+## Oct 21, 2022
+
