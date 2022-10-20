@@ -86,4 +86,7 @@ static inline void load_gdt(struct gdt_register *gdtr)
     asm volatile("lgdtq %0" :: "m"(*gdtr));
 }
 
+extern const struct gdt_page gdt;
+extern struct gdt_register gdtr;
+
 #endif

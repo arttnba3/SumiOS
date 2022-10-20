@@ -11,6 +11,7 @@
         "page.h": "c",
         "io.h": "c",
         "segment.h": "c",
-        "desc.h": "c"
+        "desc.h": "c",
+        "interrupt.h": "c"
     }
 }

@@ -102,3 +102,11 @@ One more thing is that I forgot to migrate the `boot_stack` to high mem, but it 
 - fix bugs in buddy system
 - add basic atomic operations
 - migrate `boot_stack` to highmem
+
+## Oct 20, 2022
+
+I've almost forgot there's an uncompleted kernel here because of continuously coming shits to deal with. So it's been a long while until I made a new commit for it.
+
+I'm still struglling against the part that related to the architecture, only x86-64 is in a half-completed stage. I wish to add supports for more ISA in the future.
+
+- add gdt initialization
