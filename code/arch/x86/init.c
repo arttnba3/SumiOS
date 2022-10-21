@@ -19,11 +19,8 @@ static void gdt_init(void)
 
 static void idt_init(void)
 {
-    static const uint64_t interrupt_descriptor_table[] = {
-
-    };
-    phys_addr_t idt_addr = &interrupt_descriptor_table;
-
+    idtr.address = &idt;
+    idtr.size = sizeof(idt);
     load_idt(&idtr);
 }
 
@@ -44,6 +41,8 @@ void arch_init(void)
 
     /* load the idt */
     idt_init();
+
+    int n = *((int*)(0xdeadbeef));
 
     /* set the clock */
     clock_init();
