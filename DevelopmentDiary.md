@@ -112,6 +112,14 @@ I'm still struglling against the part that related to the architecture, only x86
 The part of handling interrupt cost me plenty of time. The system developed by Intel is much more burdensome than I've ever thought. So it seems that the interrupt handler needs more time to be completed.
 
 - add gdt initialization
+- add basic structure of gates
 
 ## Oct 21, 2022
 
+The IDT and gates seem to work correctly, so the next thing for me to do is to complete handlers for traps and exceptions.
+
+One more thing is that as everything seems to be working well, I need to add more subsystems to complete the kernel. There's only one buddy system in memory management now, so my next step is to build a slub allocator.
+
+An unconscious bug in the `mm_phys_alloc()` was found when I re-check the code in `page_alloc.c`. Luckily the function hadn't been used yet so the bug didn't cause severe disasters.
+
+- fix bug in `mm_phys_alloc()`

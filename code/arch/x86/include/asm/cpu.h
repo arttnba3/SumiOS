@@ -1,21 +1,38 @@
-/*
- * X86 architecture related macros.
- * Note: because it's just my toy OS so only a little macros there :)
- */
-
 #ifndef X86_CPU_H
 #define X86_CPU_H
 
-/* CR0 */
-#define CR0_PG (1 << 31)
+#include <sumios/types.h>
 
-/* CR4 */
-#define CR4_PAE (1 << 5)
-#define CR4_PGE (1 << 7)
+static inline size_t read_cr2(void)
+{
+    size_t cr2;
 
-/* Segment selector */
-#define SELECTOR_RPL (0)
-#define SELECTOR_TI (1)
-#define SELECTOR_INDEX (3)
+    asm volatile("mov %%cr2, %%rax;"
+                 "mov %%rax, %0;"
+                 : "=m"(cr2)
+                 : );
+
+    return cr2;
+}
+
+static inline size_t read_cr3(void)
+{
+    size_t cr3;
+
+    asm volatile("mov %%cr3, %%rax;"
+                 "mov %%rax, %0;"
+                 : "=m"(cr3)
+                 : );
+
+    return cr3;
+}
+
+static inline void write_cr3(size_t cr3)
+{
+    asm volatile("mov %0, %%rax;"
+                 "mov %%rax, %%cr3;"
+                 :
+                 : "r"(cr3));
+}
 
 #endif

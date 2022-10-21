@@ -1,5 +1,5 @@
 #include <mm/page_types.h>
-#include <asm/cpu.h>
+#include <asm/cpu_types.h>
 
 #define MULTIBOOT2_HEADER_MAGIC (0xe85250d6)
 #define GRUB_MULTIBOOT_ARCHITECTURE_I386 (0)

@@ -180,7 +180,7 @@ phys_addr_t mm_phys_alloc(size_t sz)
     struct page *p;
     int order = 0;
 
-    while (sz < (PAGE_SIZE << order)) {
+    while (sz > (PAGE_SIZE << order)) {
         order++;
     }
 
@@ -196,12 +196,12 @@ phys_addr_t mm_phys_alloc(size_t sz)
 /**
  * @brief allocate memory from buddy system
  * 
- * @param sz size to allocate, which will be 2^order aligned
+ * @param sz size to allocate, which will be (2^n * PAGE_SIZE) aligned
  * @return virt_addr_t address of allocated memory, NULL for failed
  */
 virt_addr_t mm_alloc(size_t sz)
 {
-    virt_addr_t physm = mm_phys_alloc(sz);
+    phys_addr_t physm = mm_phys_alloc(sz);
 
     if (physm == -1) {
         return NULL;

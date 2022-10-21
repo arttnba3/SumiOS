@@ -23,6 +23,9 @@ static inline void load_idt(struct idt_register *idt)
 extern struct interrupt_descriptor_table idt;
 extern struct idt_register idtr;
 
+extern void set_intr_handler(int nr, void (*handler)(void));
+extern void set_trap_handler(int nr, void (*handler)(void));
 extern void page_fault_handler(void);
+extern void null_intr_handler(void);
 
 #endif

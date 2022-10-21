@@ -1,4 +1,4 @@
-#include <asm/cpu.h>
+#include <asm/cpu_types.h>
 
 .extern startup64
 
