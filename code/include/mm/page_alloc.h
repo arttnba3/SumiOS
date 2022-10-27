@@ -3,10 +3,9 @@
 
 #define MAX_PAGE_ORDER 11
 
-struct page *alloc_pages(int order);
-void free_pages(struct page *p, int order);
-
-phys_addr_t mm_phys_alloc(size_t sz);
-virt_addr_t mm_alloc(size_t sz);
+extern struct page *alloc_pages(int order);
+extern void free_pages(struct page *p, int order);
+extern phys_addr_t mm_phys_alloc(size_t sz);
+extern virt_addr_t mm_alloc(size_t sz);
 
 #endif

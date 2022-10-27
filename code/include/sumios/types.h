@@ -1,6 +1,8 @@
 #ifndef SUMIOS_TYPES_H
 #define SUMIOS_TYPES_H
 
+#include <mm/page_types.h>
+
 typedef unsigned char   uint8_t;
 typedef signed char     int8_t;
 typedef unsigned short  uint16_t;
