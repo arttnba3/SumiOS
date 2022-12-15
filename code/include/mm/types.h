@@ -1,7 +1,7 @@
 #ifndef MM_TYPES_H
 #define MM_TYPES_H
 
-#include <sumios/kernel.h>
+#include <sumios/types.h>
 #include <mm/page_types.h>
 
 typedef size_t virt_addr_t;

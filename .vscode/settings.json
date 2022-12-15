@@ -13,6 +13,7 @@
         "segment.h": "c",
         "desc.h": "c",
         "interrupt.h": "c",
-        "trap.h": "c"
+        "trap.h": "c",
+        "slub.h": "c"
     }
 }

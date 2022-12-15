@@ -26,6 +26,12 @@ int main(multiboot_uint8_t *mbi)
     arch_init();
     kputs("\n\t[+] arch related initialization complete.");
 
+
+    for (size_t i = 0; i < 1145141919; i++) {
+        void *obj = kmalloc(0x10 << (i % 10));
+        kprintf("[allocate time: %lu] get object at %p\n", i, obj);
+    }
+
     while (1) {
         asm volatile ("hlt");
     }

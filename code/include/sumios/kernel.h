@@ -7,6 +7,8 @@
 #include <sumios/types.h>
 #include <sumios/list.h>
 
+#include <mm/slub.h>
+
 #ifndef offsetof
 #define offsetof(type, member) ((size_t) &(((type*)NULL)->member))
 #endif

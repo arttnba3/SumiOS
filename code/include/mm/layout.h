@@ -7,7 +7,7 @@
 #ifndef MM_LAYOUT_H
 #define MM_LAYOUT_H
 
-#include <sumios/kernel.h>
+#include <sumios/types.h>
 
 #define REALMODE_TEXT_MODE_ADDR 0xB8000
 #define REALMODE_TEXT_MODE_END  0xB8FFF
@@ -26,6 +26,6 @@
         (va == KERNEL_DIRECT_MAPPING_AREA || va == KERNEL_BASE_ADDR)
 
 #define PHYS_TO_KERNEL_DIRECT_MAPPING_ADDR(x) \
-        (((uint64_t) (x)) + KERNEL_DIRECT_MAPPING_AREA)
+        (((size_t) (x)) + KERNEL_DIRECT_MAPPING_AREA)
 
 #endif

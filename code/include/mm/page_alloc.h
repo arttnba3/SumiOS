@@ -1,6 +1,9 @@
 #ifndef MM_PAGE_ALLOC_H
 #define MM_PAGE_ALLOC_H
 
+#include <sumios/kernel.h>
+#include <mm/types.h>
+
 #define MAX_PAGE_ORDER 11
 
 extern struct page *alloc_pages(int order);

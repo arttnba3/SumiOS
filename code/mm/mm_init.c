@@ -3,6 +3,7 @@
 #include <mm/mm.h>
 #include <mm/page_alloc.h>
 #include <mm/layout.h>
+#include <mm/slub.h>
 #include <boot/multiboot2.h>
 
 extern phys_addr_t boot_kern_pgtable;
@@ -146,9 +147,8 @@ static void mm_init_pgtable_map(phys_addr_t pgtable, virt_addr_t va,
     pte[pte_i] = pa | attr;
 }
 
-
-/* initialize the memory management subsystem */
-void mm_init(multiboot_uint8_t *mbi)
+/* analyze GRUB tags, init for page struct and buddy system */
+static void mm_pages_allocator_init(multiboot_uint8_t *mbi)
 {
     struct multiboot_tag *tags;
     struct multiboot_tag_basic_meminfo *bmem_info;
@@ -287,4 +287,11 @@ void mm_init(multiboot_uint8_t *mbi)
 
     /* unmap the old phys part */
     ((pgd_t*) kern_pgtable)[0] = NULL;
+}
+
+/* initialize the memory management subsystem */
+void mm_init(multiboot_uint8_t *mbi)
+{
+    mm_pages_allocator_init(mbi);
+    kmem_cache_init();
 }

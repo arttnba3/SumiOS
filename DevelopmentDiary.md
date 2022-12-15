@@ -123,3 +123,30 @@ One more thing is that as everything seems to be working well, I need to add mor
 An unconscious bug in the `mm_phys_alloc()` was found when I re-check the code in `page_alloc.c`. Luckily the function hadn't been used yet so the bug didn't cause severe disasters.
 
 - fix bug in `mm_phys_alloc()`
+
+## Nov 28, 2022
+
+It's been a long while later and I've achieved lying down on the bed for a month :)
+
+In fact I'm not so busy but just lazy recently, so I decided to relax for several days and it gradually become weeks. But when I tried to restart the project weeks ago, my disk(PM981A, Samsung SSD) broke down unexpectedly and all my system data lost. Luckily all my data is stored in another disk physically including my Ubuntu VM for development.
+
+Today I'd like to complete part of slub allocator because dynamic memory allocation is the most basic part of the kernel.
+
+- add `kmem_cache` array and basic part of `kmalloc()`
+
+## Nov 29, 2022
+
+The slub allocator seen to be more easier to complete than I've expected though I've almost forgot what the members mean in `struct page` and some other structures. But when I thought that I had made the allocating part perfect, it threw a `TRAP_GP` (General Protection) to my face and I don't know why.
+
+But where there's a road, there's a way. After uncountable times of reparing, I finally found that the best solution for me is to rewrite the core function and hope it can work well once again. And I'll do it SOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOON...
+
+- start rewriting `slub_alloc()`
+
+## Nov 30
+
+The memory allocation part is almost down and it seems that there's no bugs for that after my hard coding for the whole day(in fact some bugs appeared and stuck me for a long while but finally got solved).
+
+So it comes to the part of `kfree()`, which is more complex than the `kmalloc()`.
+
+- complete `kmalloc()`
+

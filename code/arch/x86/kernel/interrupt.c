@@ -33,6 +33,6 @@ void page_fault_handler(void)
 
 void null_intr_handler(void)
 {
-    kputs("[x] NO handler set for current interrupt! hlting...");
+    kputs("[x] NO handler set for CURRENT interrupt! hlting...");
     asm volatile(" hlt ");
 }
